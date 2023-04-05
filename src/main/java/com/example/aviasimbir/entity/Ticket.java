@@ -16,16 +16,19 @@ public class Ticket {
     private Boolean reserved;
     @Column(name = "sold")
     private Boolean sold;
+    @Column(name = "commission")
+    private Boolean commission;
 
     public Ticket() {
     }
 
-    public Ticket(Flight flight, double price, Boolean reserved, Boolean sold) {
+    public Ticket( Flight flight, double price, Boolean reserved, Boolean sold,Boolean commission) {
         this.id = id;
         this.flight = flight;
         this.price = price;
         this.reserved = reserved;
         this.sold = sold;
+        this.commission=commission;
     }
 
     public Long getId() {

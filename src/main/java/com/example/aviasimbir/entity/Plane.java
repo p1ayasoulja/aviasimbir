@@ -21,7 +21,8 @@ public class Plane {
     public Plane() {
     }
 
-    public Plane(String brand, String model, int seats, Airline airline) {
+    public Plane( String brand, String model, int seats, Airline airline) {
+        this.id = id;
         this.brand = brand;
         this.model = model;
         this.seats = seats;

@@ -26,15 +26,13 @@ public class Flight {
     }
 
     public Flight(Plane plane, String departure, String destination,
-                  LocalDateTime departureTime, LocalDateTime arrivalTime,
-                  List<Ticket> tickets) {
+                  LocalDateTime departureTime, LocalDateTime arrivalTime) {
 
         this.plane = plane;
         this.departure = departure;
         this.destination = destination;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
-        this.tickets = tickets;
     }
 
     public Long getId() {

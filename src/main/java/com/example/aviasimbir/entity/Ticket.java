@@ -11,7 +11,7 @@ public class Ticket {
     @JoinColumn(name = "flight")
     private Flight flight;
     @Column(name = "price")
-    private double price;
+    private Integer price;
     @Column(name = "reserved")
     private Boolean reserved;
     @Column(name = "sold")
@@ -22,13 +22,12 @@ public class Ticket {
     public Ticket() {
     }
 
-    public Ticket( Flight flight, double price, Boolean reserved, Boolean sold,Boolean commission) {
-        this.id = id;
+    public Ticket(Flight flight, Integer price, Boolean reserved, Boolean sold, Boolean commission) {
         this.flight = flight;
         this.price = price;
         this.reserved = reserved;
         this.sold = sold;
-        this.commission=commission;
+        this.commission = commission;
     }
 
     public Long getId() {
@@ -47,11 +46,11 @@ public class Ticket {
         this.flight = flight;
     }
 
-    public double getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 
@@ -69,5 +68,13 @@ public class Ticket {
 
     public void setSold(Boolean sold) {
         this.sold = sold;
+    }
+
+    public Boolean getCommission() {
+        return commission;
+    }
+
+    public void setCommission(Boolean commission) {
+        this.commission = commission;
     }
 }

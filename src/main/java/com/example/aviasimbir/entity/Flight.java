@@ -27,7 +27,7 @@ public class Flight {
 
     public Flight(Plane plane, String departure, String destination,
                   LocalDateTime departureTime, LocalDateTime arrivalTime) {
-
+        this.id = id;
         this.plane = plane;
         this.departure = departure;
         this.destination = destination;

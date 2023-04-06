@@ -2,11 +2,11 @@ package com.example.aviasimbir.requestresponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class CreateTickerRequest {
+public class CreateTicketRequest {
     private Integer price;
     private Boolean commission;
 
-    public CreateTickerRequest(@JsonProperty("price") Integer price, @JsonProperty("commission") Boolean commission) {
+    public CreateTicketRequest(@JsonProperty("price") Integer price, @JsonProperty("commission") Boolean commission) {
         this.price = price;
         this.commission = commission;
     }

@@ -1,7 +1,7 @@
 package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.entity.Ticket;
-import com.example.aviasimbir.requestresponse.CreateTickerRequest;
+import com.example.aviasimbir.requestresponse.CreateTicketRequest;
 import com.example.aviasimbir.requestresponse.TicketResponse;
 import com.example.aviasimbir.service.FlightService;
 import com.example.aviasimbir.service.PlaneService;
@@ -23,7 +23,7 @@ public class TicketController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
-    public ResponseEntity<TicketResponse> createTicket(@PathVariable("id") Long id, @RequestBody CreateTickerRequest createTickerRequest) {
+    public ResponseEntity<TicketResponse> createTicket(@PathVariable("id") Long id, @RequestBody CreateTicketRequest createTickerRequest) {
         Ticket ticket = ticketService.create(flightService.get(id).get(), createTickerRequest.getPrice(),
                 false, false, createTickerRequest.getCommission());
         TicketResponse ticketResponse = new TicketResponse(ticket.getFlight().getDeparture(), ticket.getFlight().getDestination(),

@@ -31,5 +31,4 @@ public class TicketController {
         return ResponseEntity.ok(ticketResponse);
     }
 
-
 }

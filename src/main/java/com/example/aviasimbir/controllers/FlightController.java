@@ -1,8 +1,10 @@
 package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.entity.Flight;
+import com.example.aviasimbir.entity.Ticket;
 import com.example.aviasimbir.requestresponse.CreateFlightRequest;
 import com.example.aviasimbir.requestresponse.FlightResponse;
+import com.example.aviasimbir.requestresponse.TicketResponse;
 import com.example.aviasimbir.requestresponse.UpdateFlightRequest;
 import com.example.aviasimbir.service.FlightService;
 import com.example.aviasimbir.service.PlaneService;

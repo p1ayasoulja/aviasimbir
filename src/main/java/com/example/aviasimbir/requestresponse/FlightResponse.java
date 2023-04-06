@@ -1,9 +1,7 @@
 package com.example.aviasimbir.requestresponse;
 
-import com.example.aviasimbir.entity.Plane;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Column;
 import java.time.LocalDateTime;
 
 public class FlightResponse {
@@ -14,10 +12,10 @@ public class FlightResponse {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
 
-    public FlightResponse(@JsonProperty("airline") String airline,@JsonProperty("departure") String departure,
-                          @JsonProperty("destination")String destination,
-                          @JsonProperty("departureTime")LocalDateTime departureTime,
-                          @JsonProperty("arrivalTime")LocalDateTime arrivalTime) {
+    public FlightResponse(@JsonProperty("airline") String airline, @JsonProperty("departure") String departure,
+                          @JsonProperty("destination") String destination,
+                          @JsonProperty("departureTime") LocalDateTime departureTime,
+                          @JsonProperty("arrivalTime") LocalDateTime arrivalTime) {
         this.airline = airline;
         this.departure = departure;
         this.destination = destination;

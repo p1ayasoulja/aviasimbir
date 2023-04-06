@@ -10,8 +10,8 @@ public class PlaneResponse {
     private String airline;
 
     public PlaneResponse(@JsonProperty("brand") String brand, @JsonProperty("model") String model,
-                         @JsonProperty("seats")int seats,
-                         @JsonProperty("airline")String airline) {
+                         @JsonProperty("seats") int seats,
+                         @JsonProperty("airline") String airline) {
         this.brand = brand;
         this.model = model;
         this.seats = seats;

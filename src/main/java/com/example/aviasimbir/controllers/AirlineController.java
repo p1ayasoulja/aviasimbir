@@ -77,7 +77,6 @@ public class AirlineController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //TODO ANALYZE!
     @RequestMapping(value = "/{id}/sold", method = RequestMethod.GET)
     public ResponseEntity<String> getNumberOfSoldTickets(@PathVariable("id") Long id) {
         Optional<Airline> airline = airlineService.getAirline(id);

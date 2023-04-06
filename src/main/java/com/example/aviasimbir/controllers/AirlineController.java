@@ -1,12 +1,15 @@
 package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.entity.Airline;
+import com.example.aviasimbir.entity.Flight;
 import com.example.aviasimbir.entity.Plane;
 import com.example.aviasimbir.requestresponse.AirlineResponse;
 import com.example.aviasimbir.requestresponse.CreateAirlineRequest;
 import com.example.aviasimbir.requestresponse.UpdateAirlineRequest;
 import com.example.aviasimbir.service.AirlineService;
+import com.example.aviasimbir.service.FlightService;
 import com.example.aviasimbir.service.PlaneService;
+import com.example.aviasimbir.service.TicketService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +21,15 @@ import java.util.Optional;
 public class AirlineController {
     private final AirlineService airlineService;
     private final PlaneService planeService;
+    private final TicketService ticketService;
+    private final FlightService flightService;
 
-    public AirlineController(AirlineService airlineService, PlaneService planeService) {
+    public AirlineController(AirlineService airlineService, PlaneService planeService,
+                             TicketService ticketService, FlightService flightService) {
         this.airlineService = airlineService;
         this.planeService = planeService;
+        this.ticketService = ticketService;
+        this.flightService = flightService;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -65,8 +73,24 @@ public class AirlineController {
     @RequestMapping(value = "/{id}/planes", method = RequestMethod.GET)
     public ResponseEntity<String> numberOfPlanes(@PathVariable("id") Long id) {
         Optional<Airline> airline = airlineService.getAirline(id);
-        return airline.map(value -> ResponseEntity.ok("Number of planes of this airline = " + planeService.numberOfPlanes(value)))
+        return airline.map(value -> ResponseEntity.ok("Number of planes of this airline = " + planeService.planes(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    //TODO ANALYZE!
+    @RequestMapping(value = "/{id}/sold", method = RequestMethod.GET)
+    public ResponseEntity<String> numberOfSoldTickets(@PathVariable("id") Long id) {
+        Optional<Airline> airline = airlineService.getAirline(id);
+        int totalSoldTickets = 0;
+        if (airline.isPresent()) {
+            List<Plane> planes = planeService.getListOfPlanes(airline.get());
+            for (Plane plane : planes) {
+                List<Flight> flights = flightService.flights(plane);
+                for (Flight flight : flights) {
+                    totalSoldTickets += ticketService.soldTickets(flight);
+                }
+            }
+        }
+        return ResponseEntity.ok("Total tickets sold : " + totalSoldTickets);
+    }
 }

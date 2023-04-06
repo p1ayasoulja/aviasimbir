@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FlightService {
@@ -67,5 +68,10 @@ public class FlightService {
                 flight1.setPlane(null);
             }
         });
+    }
+
+    public List<Flight> flights(Plane plane) {
+        List<Flight> flights = flightRepo.findAll();
+        return flights.stream().filter(flight -> flight.getPlane().equals(plane)).collect(Collectors.toList());
     }
 }

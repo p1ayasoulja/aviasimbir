@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PlaneService {
@@ -38,9 +39,14 @@ public class PlaneService {
         }
     }
 
-    public Long numberOfPlanes(Airline airline) {
+    public Long planes(Airline airline) {
         List<Plane> planes = planeRepo.findAll();
         return planes.stream().filter(plane -> plane.getAirline() == airline).count();
+    }
+
+    public List<Plane> getListOfPlanes(Airline airline) {
+        List<Plane> planes = planeRepo.findAll();
+        return planes.stream().filter(plane -> plane.getAirline().equals(airline)).collect(Collectors.toList());
     }
 }
 

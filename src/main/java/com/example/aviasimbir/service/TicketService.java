@@ -61,11 +61,22 @@ public class TicketService {
 
     public Long avgCommission() {
         List<Ticket> tickets = ticketRepo.findAll();
-        long price=tickets.stream().filter(Ticket::getCommission).mapToLong(Ticket::getPrice).sum();
+        long price = tickets.stream().filter(Ticket::getCommission).mapToLong(Ticket::getPrice).sum();
         long sum = (long) ((long) (price) - ((price) / (1.025)));
         long numb = tickets.stream().filter(Ticket::getCommission).count();
         if (numb != 0) {
             return sum / numb;
         } else return (long) 0;
+    }
+
+    public Long soldTickets(Flight flight) {
+        long sum = 0;
+        List<Ticket> tickets = ticketRepo.findByFlight(flight);
+        for (Ticket ticket : tickets) {
+            if (ticket.getSold()) {
+                sum++;
+            }
+        }
+        return sum;
     }
 }

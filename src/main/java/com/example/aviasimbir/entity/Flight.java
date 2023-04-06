@@ -22,12 +22,12 @@ public class Flight {
     private LocalDateTime arrivalTime;
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Ticket> tickets;
+
     public Flight() {
     }
 
     public Flight(Plane plane, String departure, String destination,
                   LocalDateTime departureTime, LocalDateTime arrivalTime) {
-
         this.plane = plane;
         this.departure = departure;
         this.destination = destination;

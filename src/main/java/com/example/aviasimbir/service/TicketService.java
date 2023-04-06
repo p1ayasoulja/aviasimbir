@@ -25,7 +25,7 @@ public class TicketService {
      * @return билет
      */
     public Optional<Ticket> getTicket(Long id) {
-        log.info("IN get - Ticket: {} successfully found", id);
+        log.info("IN getTicket - Ticket: {} successfully found", id);
         return ticketRepo.findById(id);
     }
 
@@ -35,7 +35,7 @@ public class TicketService {
      * @return список билетов
      */
     public List<Ticket> getAllTickets() {
-        log.info("IN get - List of : {} successfully found", "tickets");
+        log.info("IN getAllTickets - List of : {} successfully found", "tickets");
         return ticketRepo.findAll();
     }
 
@@ -56,7 +56,7 @@ public class TicketService {
         }
         Ticket ticket = new Ticket(flight, priceUpdated, reserved, sold, commission);
         ticketRepo.save(ticket);
-        log.info("IN create - Ticket: {} successfully created", ticket.getId());
+        log.info("IN createTicket - Ticket: {} successfully created", ticket.getId());
         return ticket;
     }
 
@@ -81,10 +81,10 @@ public class TicketService {
                 ticket.get().setSold(true);
             }
             ticketRepo.save(ticket.get());
-            log.info("IN update - Ticket: {} successfully updated", id);
+            log.info("IN updateTicket - Ticket: {} successfully updated", id);
             return ticket;
         } else {
-            log.info("IN update - Ticket: {} was not updated", id);
+            log.info("IN updateTicket - Ticket: {} was not updated", id);
             return Optional.empty();
         }
     }
@@ -96,7 +96,7 @@ public class TicketService {
      */
     public void deleteTicket(Long id) {
         ticketRepo.deleteById(id);
-        log.info("IN delete - Ticket: {} successfully deleted", id);
+        log.info("IN deleteTicket - Ticket: {} successfully deleted", id);
     }
 
     /**
@@ -120,7 +120,7 @@ public class TicketService {
         long sum = (long) ((long) (price) - ((price) / (1.025)));
         long numb = tickets.stream().filter(Ticket::getCommission).count();
         if (numb != 0) {
-            log.info("IN angCommission - Average Commission: {} successfully counted", sum / numb);
+            log.info("IN getAverageCommissionOfSoldTickets - Average Commission: {} successfully counted", sum / numb);
             return sum / numb;
         } else return (long) 0;
     }
@@ -138,7 +138,7 @@ public class TicketService {
                 sum++;
             }
         }
-        log.info("IN soldTickets - Tickets: {} successfully sold", sum);
+        log.info("IN getSoldTicketCount - Tickets: {} successfully sold", sum);
         return sum;
     }
 }

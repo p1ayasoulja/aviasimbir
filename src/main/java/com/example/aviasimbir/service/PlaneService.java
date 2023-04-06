@@ -25,7 +25,7 @@ public class PlaneService {
      * @return самолет
      */
     public Optional<Plane> getPlane(Long id) {
-        log.info("IN get - Plane: {} successfully found", id);
+        log.info("IN getPlane - Plane: {} successfully found", id);
         return planeRepo.findById(id);
     }
     /**
@@ -34,7 +34,7 @@ public class PlaneService {
      * @return список самолетов
      */
     public List<Plane> getAllPlanes() {
-        log.info("IN get - List of: {} successfully found", "planes");
+        log.info("IN getAllPlanes - List of: {} successfully found", "planes");
         return planeRepo.findAll();
     }
     /**
@@ -49,7 +49,7 @@ public class PlaneService {
     public Plane createPlane(String brand, String model, int seats, Airline airline) {
         Plane plane = new Plane(brand, model, seats, airline);
         planeRepo.save(plane);
-        log.info("IN create - Plane: {} successfully created", plane.getId());
+        log.info("IN createPlane - Plane: {} successfully created", plane.getId());
         return plane;
     }
     /**
@@ -62,7 +62,7 @@ public class PlaneService {
         if (plane.isPresent()) {
             plane.get().setAirline(null);
             planeRepo.deleteById(plane.get().getId());
-            log.info("IN delete - Plane: {} successfully deleted", id);
+            log.info("IN deletePlane - Plane: {} successfully deleted", id);
         }
     }
     /**
@@ -73,7 +73,7 @@ public class PlaneService {
      */
     public Long getPlanesCount(Airline airline) {
         List<Plane> planes = planeRepo.findAll();
-        log.info("IN planes - Planes of: {} successfully counted", airline.getName());
+        log.info("IN getPlanesCount - Planes of: {} successfully counted", airline.getName());
         return planes.stream().filter(plane -> plane.getAirline() == airline).count();
 
     }

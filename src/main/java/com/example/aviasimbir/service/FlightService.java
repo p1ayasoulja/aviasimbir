@@ -27,7 +27,7 @@ public class FlightService {
      * @return рейс
      */
     public Optional<Flight> getFlight(Long id) {
-        log.info("IN get - Flight: {} successfully found", id);
+        log.info("IN getFlight - Flight: {} successfully found", id);
         return flightRepo.findById(id);
     }
 
@@ -35,7 +35,7 @@ public class FlightService {
      * Получение всех рейсов
      */
     public List<Flight> getAllFlights() {
-        log.info("IN getAll - List of {} successfully found", "flights");
+        log.info("IN getAllFlights - List of {} successfully found", "flights");
         return flightRepo.findAll();
     }
 
@@ -53,7 +53,7 @@ public class FlightService {
                                LocalDateTime departureTime, LocalDateTime arrivalTime) {
         Flight flight = new Flight(plane, departure, destination, departureTime, arrivalTime);
         flightRepo.save(flight);
-        log.info("IN create - Flight: {} successfully created", flight.getId());
+        log.info("IN createFlight - Flight: {} successfully created", flight.getId());
         return flight;
     }
 
@@ -87,7 +87,7 @@ public class FlightService {
             if (!destination.isEmpty()) {
                 flight.get().setDestination(destination);
             }
-            log.info("IN update - Flight: {} successfully updated", id);
+            log.info("IN updateFlight - Flight: {} successfully updated", id);
             flightRepo.save(flight.get());
             return flight;
         } else return Optional.empty();
@@ -100,8 +100,12 @@ public class FlightService {
      */
 
     public void deleteFlight(Long id) {
-        flightRepo.deleteById(id);
-        log.info("IN delete - Flight: {} successfully deleted", id);
+        Optional<Flight> flight = flightRepo.findById(id);
+        if (flight.isPresent()) {
+            flight.get().setPlane(null);
+            flightRepo.deleteById(flight.get().getId());
+            log.info("IN deleteFlight - Flight: {} successfully deleted", id);
+        }
     }
 
     /**
@@ -116,6 +120,7 @@ public class FlightService {
                 flight1.setPlane(null);
             }
         });
+        log.info("IN setPlaneFieldToNull - PlaneField of flights by {} successfully updated to null", "plane");
     }
 
     /**
@@ -126,6 +131,7 @@ public class FlightService {
      */
     public List<Flight> getFlightsByPlane(Plane plane) {
         List<Flight> flights = flightRepo.findAll();
+        log.info("IN getFlightsByPlane - List of : {} successfully updated", "flights");
         return flights.stream().filter(flight -> flight.getPlane().equals(plane)).collect(Collectors.toList());
     }
 }

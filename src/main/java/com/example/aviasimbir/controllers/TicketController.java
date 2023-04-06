@@ -32,7 +32,7 @@ public class TicketController {
     }
 
     @RequestMapping(value = "/avgcommission", method = RequestMethod.GET)
-    public ResponseEntity<String> avgCommission() {
+    public ResponseEntity<String> getAverageCommission() {
         return ResponseEntity.ok("Average Commission = " + ticketService.getAverageCommissionOfSoldTickets());
 
     }

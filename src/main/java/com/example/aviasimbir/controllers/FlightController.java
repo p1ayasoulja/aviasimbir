@@ -75,7 +75,7 @@ public class FlightController {
     }
 
     @RequestMapping(value = "/kazan", method = RequestMethod.GET)
-    public ResponseEntity<String> soldTicketsFromKazan() {
+    public ResponseEntity<String> getSoldTicketsFromKazanCount() {
         return ResponseEntity.ok("Tickets sold with departure Kazan : " + ticketService.getTicketsToKazanCount());
     }
 }

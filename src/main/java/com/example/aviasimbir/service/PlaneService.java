@@ -1,11 +1,14 @@
 package com.example.aviasimbir.service;
 
 import com.example.aviasimbir.entity.Airline;
+import com.example.aviasimbir.entity.Logger;
 import com.example.aviasimbir.entity.Plane;
+import com.example.aviasimbir.repo.LoggerRepo;
 import com.example.aviasimbir.repo.PlaneRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -14,20 +17,24 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PlaneService {
     private final PlaneRepo planeRepo;
+    private final LoggerRepo loggerRepo;
 
-    public PlaneService(PlaneRepo planeRepo) {
+    public PlaneService(PlaneRepo planeRepo, LoggerRepo loggerRepo) {
         this.planeRepo = planeRepo;
+        this.loggerRepo = loggerRepo;
     }
+
     /**
      * Получить самолет по идентификатору
      *
-     * @param id   идентификатор самолета
+     * @param id идентификатор самолета
      * @return самолет
      */
     public Optional<Plane> getPlane(Long id) {
         log.info("IN getPlane - Plane: {} successfully found", id);
         return planeRepo.findById(id);
     }
+
     /**
      * Получить список самолетов
      *
@@ -37,12 +44,13 @@ public class PlaneService {
         log.info("IN getAllPlanes - List of: {} successfully found", "planes");
         return planeRepo.findAll();
     }
+
     /**
      * Создать самолет
      *
      * @param brand   бренд самолета
-     * @param model модель самолета
-     * @param seats число мест
+     * @param model   модель самолета
+     * @param seats   число мест
      * @param airline авиалиния
      * @return самолет
      */
@@ -52,6 +60,7 @@ public class PlaneService {
         log.info("IN createPlane - Plane: {} successfully created", plane.getId());
         return plane;
     }
+
     /**
      * Удалить самолет
      *
@@ -63,8 +72,10 @@ public class PlaneService {
             plane.get().setAirline(null);
             planeRepo.deleteById(plane.get().getId());
             log.info("IN deletePlane - Plane: {} successfully deleted", id);
+            loggerRepo.save(new Logger(plane.get().toString() + " was deleted", LocalDateTime.now()));
         }
     }
+
     /**
      * Посчитать число самолетов авиалинии
      *
@@ -77,6 +88,7 @@ public class PlaneService {
         return planes.stream().filter(plane -> plane.getAirline() == airline).count();
 
     }
+
     /**
      * Получить список самолетов авиалинии
      *

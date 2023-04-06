@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CreateTicketRequest {
     private Integer price;
     private Boolean commission;
+
     @JsonCreator
     public CreateTicketRequest(@JsonProperty("price") Integer price, @JsonProperty("commission") Boolean commission) {
         this.price = price;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class UpdateAirlineRequest {
 
     private String name;
+
     @JsonCreator
     public UpdateAirlineRequest(@JsonProperty("name") String name) {
         this.name = name;

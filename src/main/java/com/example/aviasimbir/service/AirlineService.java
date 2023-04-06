@@ -1,10 +1,13 @@
 package com.example.aviasimbir.service;
 
 import com.example.aviasimbir.entity.Airline;
+import com.example.aviasimbir.entity.Logger;
 import com.example.aviasimbir.repo.AirlineRepo;
+import com.example.aviasimbir.repo.LoggerRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,9 +15,11 @@ import java.util.Optional;
 @Slf4j
 public class AirlineService {
     private final AirlineRepo airlineRepo;
+    private final LoggerRepo loggerRepo;
 
-    public AirlineService(AirlineRepo airlineRepo) {
+    public AirlineService(AirlineRepo airlineRepo, LoggerRepo loggerRepo) {
         this.airlineRepo = airlineRepo;
+        this.loggerRepo = loggerRepo;
     }
 
     /**
@@ -83,6 +88,7 @@ public class AirlineService {
         if (airline.isPresent()) {
             airlineRepo.deleteById(airline.get().getId());
             log.info("IN delete - Airline: {} successfully deleted", id);
+            loggerRepo.save(new Logger(airline.get().toString() + " was deleted", LocalDateTime.now()));
         }
     }
 }

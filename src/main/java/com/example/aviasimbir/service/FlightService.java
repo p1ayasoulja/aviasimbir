@@ -1,8 +1,10 @@
 package com.example.aviasimbir.service;
 
 import com.example.aviasimbir.entity.Flight;
+import com.example.aviasimbir.entity.Logger;
 import com.example.aviasimbir.entity.Plane;
 import com.example.aviasimbir.repo.FlightRepo;
+import com.example.aviasimbir.repo.LoggerRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -15,9 +17,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FlightService {
     private final FlightRepo flightRepo;
+    private final LoggerRepo loggerRepo;
 
-    public FlightService(FlightRepo flightRepo) {
+    public FlightService(FlightRepo flightRepo, LoggerRepo loggerRepo) {
         this.flightRepo = flightRepo;
+        this.loggerRepo = loggerRepo;
     }
 
     /**
@@ -105,6 +109,7 @@ public class FlightService {
             flight.get().setPlane(null);
             flightRepo.deleteById(flight.get().getId());
             log.info("IN deleteFlight - Flight: {} successfully deleted", id);
+            loggerRepo.save(new Logger(flight.get().toString() + " was deleted", LocalDateTime.now()));
         }
     }
 

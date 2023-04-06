@@ -8,6 +8,7 @@ public class CreatePlaneRequest {
     private String model;
     private Integer seats;
     private Long airline;
+
     @JsonCreator
     public CreatePlaneRequest(@JsonProperty("brand") String brand, @JsonProperty("model") String model,
                               @JsonProperty("seats") Integer seats,

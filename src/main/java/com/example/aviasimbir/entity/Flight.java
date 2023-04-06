@@ -90,4 +90,10 @@ public class Flight {
     public void setTickets(List<Ticket> tickets) {
         this.tickets = tickets;
     }
+
+    @Override
+    public String toString() {
+        return "Flight with " +
+                "id = " + id;
+    }
 }

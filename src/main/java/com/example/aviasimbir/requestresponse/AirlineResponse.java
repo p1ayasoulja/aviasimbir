@@ -8,6 +8,7 @@ public class AirlineResponse {
     public AirlineResponse(String name) {
         this.name = name;
     }
+
     @JsonProperty("name")
     public String getName() {
         return name;

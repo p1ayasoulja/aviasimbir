@@ -242,5 +242,18 @@
             <column name="commission" value="false"/>
         </insert>
     </changeSet>
+    <changeSet id="1.6" author="Andrey Galanov">
+        <createTable tableName="log">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 
 </databaseChangeLog>

@@ -67,4 +67,10 @@ public class Plane {
     public void setAirline(Airline airline) {
         this.airline = airline;
     }
+
+    @Override
+    public String toString() {
+        return "Plane with " +
+                "id = " + id;
+    }
 }

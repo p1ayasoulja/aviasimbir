@@ -11,6 +11,7 @@ public class UpdateFlightRequest {
     private String destination;
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
+
     @JsonCreator
     public UpdateFlightRequest(@JsonProperty("plane") Long plane_id, @JsonProperty("departure") String departure,
                                @JsonProperty("destination") String destination,

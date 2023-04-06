@@ -1,11 +1,14 @@
 package com.example.aviasimbir.service;
 
 import com.example.aviasimbir.entity.Flight;
+import com.example.aviasimbir.entity.Logger;
 import com.example.aviasimbir.entity.Ticket;
+import com.example.aviasimbir.repo.LoggerRepo;
 import com.example.aviasimbir.repo.TicketRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,8 +16,10 @@ import java.util.Optional;
 @Slf4j
 public class TicketService {
     private final TicketRepo ticketRepo;
+    private final LoggerRepo loggerRepo;
 
-    public TicketService(TicketRepo ticketRepo) {
+    public TicketService(TicketRepo ticketRepo, LoggerRepo loggerRepo) {
+        this.loggerRepo = loggerRepo;
         this.ticketRepo = ticketRepo;
     }
 
@@ -95,8 +100,12 @@ public class TicketService {
      * @param id идентификатор билета
      */
     public void deleteTicket(Long id) {
-        ticketRepo.deleteById(id);
-        log.info("IN deleteTicket - Ticket: {} successfully deleted", id);
+        Optional<Ticket> ticket = ticketRepo.findById(id);
+        if (ticket.isPresent()) {
+            ticketRepo.deleteById(id);
+            log.info("IN deleteTicket - Ticket: {} successfully deleted", id);
+            loggerRepo.save(new Logger(ticket.get().toString() + " was deleted", LocalDateTime.now()));
+        }
     }
 
     /**
@@ -109,6 +118,7 @@ public class TicketService {
         log.info("IN ticketsToKazan - Tickets to {} successfully found", "Kazan");
         return tickets.stream().filter(ticket -> ticket.getFlight().getDeparture().equals("Kazan") && ticket.getSold()).count();
     }
+
     /**
      * Подсчитать среднюю коммиссию по проданным билетам
      *
@@ -124,6 +134,7 @@ public class TicketService {
             return sum / numb;
         } else return (long) 0;
     }
+
     /**
      * Подсчитать на какую сумму продано билетов на данном рейсе
      *

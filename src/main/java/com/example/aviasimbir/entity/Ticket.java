@@ -77,4 +77,10 @@ public class Ticket {
     public void setCommission(Boolean commission) {
         this.commission = commission;
     }
+
+    @Override
+    public String toString() {
+        return "Ticket with " +
+                "id = " + id;
+    }
 }

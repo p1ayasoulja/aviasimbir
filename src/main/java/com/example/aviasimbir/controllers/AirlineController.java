@@ -43,7 +43,7 @@ public class AirlineController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<AirlineResponse> createAirline(@RequestBody CreateAirlineRequest createAirlineRequest) {
-        Airline airline = airlineService.create(createAirlineRequest.getName());
+        Airline airline = airlineService.createAirline(createAirlineRequest.getName());
         AirlineResponse airlineResponse = new AirlineResponse(airline.getName());
         return ResponseEntity.ok(airlineResponse);
     }
@@ -53,7 +53,7 @@ public class AirlineController {
                                                          @RequestBody UpdateAirlineRequest updateAirlineRequest) {
         Optional<Airline> airline = airlineService.getAirline(id);
         if (airline.isPresent()) {
-            airlineService.update(id, updateAirlineRequest.getName());
+            airlineService.updateAirline(id, updateAirlineRequest.getName());
             AirlineResponse airlineResponse = new AirlineResponse(airline.get().getName());
             return ResponseEntity.ok(airlineResponse);
         } else return ResponseEntity.notFound().build();
@@ -61,19 +61,19 @@ public class AirlineController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteAirline(@PathVariable("id") Long id) {
-        List<Plane> plane = planeService.getAll();
+        List<Plane> plane = planeService.getAllPlanes();
         plane.forEach(plane1 -> {
             if (plane1.getAirline().getId().equals(id)) {
                 plane1.setAirline(null);
             }
         });
-        airlineService.delete(id);
+        airlineService.deleteAirline(id);
     }
 
     @RequestMapping(value = "/{id}/planes", method = RequestMethod.GET)
     public ResponseEntity<String> numberOfPlanes(@PathVariable("id") Long id) {
         Optional<Airline> airline = airlineService.getAirline(id);
-        return airline.map(value -> ResponseEntity.ok("Number of planes of this airline = " + planeService.planes(value)))
+        return airline.map(value -> ResponseEntity.ok("Number of planes of this airline = " + planeService.getPlanesCount(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -85,9 +85,9 @@ public class AirlineController {
         if (airline.isPresent()) {
             List<Plane> planes = planeService.getListOfPlanes(airline.get());
             for (Plane plane : planes) {
-                List<Flight> flights = flightService.flights(plane);
+                List<Flight> flights = flightService.getFlightsByPlane(plane);
                 for (Flight flight : flights) {
-                    totalSoldTickets += ticketService.soldTickets(flight);
+                    totalSoldTickets += ticketService.getSoldTicketCount(flight);
                 }
             }
         }

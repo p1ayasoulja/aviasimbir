@@ -24,7 +24,7 @@ public class TicketController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.POST)
     public ResponseEntity<TicketResponse> createTicket(@PathVariable("id") Long id, @RequestBody CreateTicketRequest createTickerRequest) {
-        Ticket ticket = ticketService.create(flightService.get(id).get(), createTickerRequest.getPrice(),
+        Ticket ticket = ticketService.createTicket(flightService.getFlight(id).get(), createTickerRequest.getPrice(),
                 false, false, createTickerRequest.getCommission());
         TicketResponse ticketResponse = new TicketResponse(ticket.getFlight().getDeparture(), ticket.getFlight().getDestination(),
                 ticket.getPrice(), ticket.getReserved(), ticket.getSold());
@@ -33,7 +33,7 @@ public class TicketController {
 
     @RequestMapping(value = "/avgcommission", method = RequestMethod.GET)
     public ResponseEntity<String> avgCommission() {
-        return ResponseEntity.ok("Average Commission = " + ticketService.avgCommission());
+        return ResponseEntity.ok("Average Commission = " + ticketService.getAverageCommissionOfSoldTickets());
 
     }
 }

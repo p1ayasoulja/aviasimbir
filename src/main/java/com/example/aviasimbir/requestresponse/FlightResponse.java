@@ -12,10 +12,7 @@ public class FlightResponse {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
 
-    public FlightResponse(@JsonProperty("airline") String airline, @JsonProperty("departure") String departure,
-                          @JsonProperty("destination") String destination,
-                          @JsonProperty("departureTime") LocalDateTime departureTime,
-                          @JsonProperty("arrivalTime") LocalDateTime arrivalTime) {
+    public FlightResponse(String airline, String departure, String destination, LocalDateTime departureTime, LocalDateTime arrivalTime) {
         this.airline = airline;
         this.departure = departure;
         this.destination = destination;
@@ -23,6 +20,7 @@ public class FlightResponse {
         this.arrivalTime = arrivalTime;
     }
 
+    @JsonProperty("airline")
     public String getAirline() {
         return airline;
     }
@@ -31,6 +29,7 @@ public class FlightResponse {
         this.airline = airline;
     }
 
+    @JsonProperty("departure")
     public String getDeparture() {
         return departure;
     }
@@ -39,6 +38,7 @@ public class FlightResponse {
         this.departure = departure;
     }
 
+    @JsonProperty("destination")
     public String getDestination() {
         return destination;
     }
@@ -47,6 +47,7 @@ public class FlightResponse {
         this.destination = destination;
     }
 
+    @JsonProperty("departureTime")
     public LocalDateTime getDepartureTime() {
         return departureTime;
     }
@@ -55,6 +56,7 @@ public class FlightResponse {
         this.departureTime = departureTime;
     }
 
+    @JsonProperty("arrivalTime")
     public LocalDateTime getArrivalTime() {
         return arrivalTime;
     }

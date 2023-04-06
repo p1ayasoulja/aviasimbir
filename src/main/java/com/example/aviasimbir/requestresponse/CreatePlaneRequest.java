@@ -1,5 +1,6 @@
 package com.example.aviasimbir.requestresponse;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CreatePlaneRequest {
@@ -7,7 +8,7 @@ public class CreatePlaneRequest {
     private String model;
     private Integer seats;
     private Long airline;
-
+    @JsonCreator
     public CreatePlaneRequest(@JsonProperty("brand") String brand, @JsonProperty("model") String model,
                               @JsonProperty("seats") Integer seats,
                               @JsonProperty("airline") Long airline) {

@@ -1,5 +1,6 @@
 package com.example.aviasimbir.requestresponse;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ public class UpdateFlightRequest {
     private String destination;
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
-
+    @JsonCreator
     public UpdateFlightRequest(@JsonProperty("plane") Long plane_id, @JsonProperty("departure") String departure,
                                @JsonProperty("destination") String destination,
                                @JsonProperty("departureTime") LocalDateTime departureTime,

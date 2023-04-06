@@ -27,7 +27,7 @@ public class FlightController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<FlightResponse> getFlight(@PathVariable("id") Long id) {
-        Optional<Flight> flight = flightService.get(id);
+        Optional<Flight> flight = flightService.getFlight(id);
         if (flight.isPresent()) {
             FlightResponse flightResponse = new FlightResponse(flight.get().getPlane().getAirline().getName(), flight.get().getDeparture(),
                     flight.get().getDestination(), flight.get().getDepartureTime(), flight.get().getArrivalTime());
@@ -37,7 +37,7 @@ public class FlightController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<FlightResponse> createFlight(@RequestBody CreateFlightRequest createFlightRequest) {
-        Flight flight = flightService.create(planeService.get(createFlightRequest.getPlane_id()).get(), createFlightRequest.getDeparture(),
+        Flight flight = flightService.createFlight(planeService.getPlane(createFlightRequest.getPlane_id()).get(), createFlightRequest.getDeparture(),
                 createFlightRequest.getDestination(), createFlightRequest.getDepartureTime(),
                 createFlightRequest.getArrivalTime());
         Integer price = createFlightRequest.getTicket_price();
@@ -45,7 +45,7 @@ public class FlightController {
             price = (int) (price * 1.025);
         }
         for (int i = 0; i < flight.getPlane().getSeats() / 2; i++) {
-            ticketService.create(flight, price,
+            ticketService.createTicket(flight, price,
                     false, false, createFlightRequest.getCommission());
         }
         FlightResponse flightResponse = new FlightResponse(flight.getPlane().getAirline().getName(), flight.getDeparture(),
@@ -55,10 +55,10 @@ public class FlightController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public ResponseEntity<FlightResponse> updateFlight(@PathVariable("id") Long id, @RequestBody UpdateFlightRequest updateFlightRequest) {
-        Optional<Flight> flight = flightService.get(id);
+        Optional<Flight> flight = flightService.getFlight(id);
         if (flight.isPresent()) {
-            flightService.update(id, updateFlightRequest.getDepartureTime(), updateFlightRequest.getArrivalTime(),
-                    planeService.get(updateFlightRequest.getPlane_id()).get(),
+            flightService.updateFlight(id, updateFlightRequest.getDepartureTime(), updateFlightRequest.getArrivalTime(),
+                    planeService.getPlane(updateFlightRequest.getPlane_id()).get(),
                     updateFlightRequest.getDeparture(), updateFlightRequest.getDestination());
 
             FlightResponse flightResponse = new FlightResponse(flight.get().getPlane().getAirline().getName(),
@@ -71,11 +71,11 @@ public class FlightController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteFlight(@PathVariable("id") Long id) {
-        flightService.delete(id);
+        flightService.deleteFlight(id);
     }
 
     @RequestMapping(value = "/kazan", method = RequestMethod.GET)
     public ResponseEntity<String> soldTicketsFromKazan() {
-        return ResponseEntity.ok("Tickets sold with departure Kazan : " + ticketService.ticketsToKazan());
+        return ResponseEntity.ok("Tickets sold with departure Kazan : " + ticketService.getTicketsToKazanCount());
     }
 }

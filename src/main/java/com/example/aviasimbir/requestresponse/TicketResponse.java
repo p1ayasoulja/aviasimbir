@@ -10,9 +10,8 @@ public class TicketResponse {
     private Boolean reserved;
     private Boolean sold;
 
-    public TicketResponse(@JsonProperty("departure") String departure, @JsonProperty("destination") String destination,
-                          @JsonProperty("price") Integer price, @JsonProperty("reserved") Boolean reserved,
-                          @JsonProperty("sold") Boolean sold) {
+    public TicketResponse(String departure, String destination, Integer price, Boolean reserved,
+                          Boolean sold) {
         this.departure = departure;
         this.destination = destination;
         this.price = price;
@@ -20,6 +19,7 @@ public class TicketResponse {
         this.sold = sold;
     }
 
+    @JsonProperty("departure")
     public String getDeparture() {
         return departure;
     }
@@ -28,6 +28,7 @@ public class TicketResponse {
         this.departure = departure;
     }
 
+    @JsonProperty("destination")
     public String getDestination() {
         return destination;
     }
@@ -36,6 +37,7 @@ public class TicketResponse {
         this.destination = destination;
     }
 
+    @JsonProperty("price")
     public Integer getPrice() {
         return price;
     }
@@ -44,6 +46,7 @@ public class TicketResponse {
         this.price = price;
     }
 
+    @JsonProperty("reserved")
     public Boolean getReserved() {
         return reserved;
     }
@@ -52,6 +55,7 @@ public class TicketResponse {
         this.reserved = reserved;
     }
 
+    @JsonProperty("sold")
     public Boolean getSold() {
         return sold;
     }

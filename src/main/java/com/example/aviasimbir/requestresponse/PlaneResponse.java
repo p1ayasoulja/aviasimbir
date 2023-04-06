@@ -9,15 +9,15 @@ public class PlaneResponse {
     private int seats;
     private String airline;
 
-    public PlaneResponse(@JsonProperty("brand") String brand, @JsonProperty("model") String model,
-                         @JsonProperty("seats") int seats,
-                         @JsonProperty("airline") String airline) {
+    public PlaneResponse(String brand, String model,
+                         int seats, String airline) {
         this.brand = brand;
         this.model = model;
         this.seats = seats;
         this.airline = airline;
     }
 
+    @JsonProperty("brand")
     public String getBrand() {
         return brand;
     }
@@ -26,6 +26,7 @@ public class PlaneResponse {
         this.brand = brand;
     }
 
+    @JsonProperty("model")
     public String getModel() {
         return model;
     }
@@ -34,6 +35,7 @@ public class PlaneResponse {
         this.model = model;
     }
 
+    @JsonProperty("seats")
     public int getSeats() {
         return seats;
     }
@@ -42,6 +44,7 @@ public class PlaneResponse {
         this.seats = seats;
     }
 
+    @JsonProperty("airline")
     public String getAirline() {
         return airline;
     }

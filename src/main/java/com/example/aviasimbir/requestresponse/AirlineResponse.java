@@ -5,10 +5,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AirlineResponse {
     private String name;
 
-    public AirlineResponse(@JsonProperty("name") String name) {
+    public AirlineResponse(String name) {
         this.name = name;
     }
-
+    @JsonProperty("name")
     public String getName() {
         return name;
     }

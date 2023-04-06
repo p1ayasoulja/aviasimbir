@@ -3,6 +3,7 @@ package com.example.aviasimbir.service;
 import com.example.aviasimbir.entity.Flight;
 import com.example.aviasimbir.entity.Plane;
 import com.example.aviasimbir.repo.FlightRepo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class FlightService {
     private final FlightRepo flightRepo;
 
@@ -18,23 +20,56 @@ public class FlightService {
         this.flightRepo = flightRepo;
     }
 
-    public Optional<Flight> get(Long id) {
+    /**
+     * Получение сущности рейса по идентификатору
+     *
+     * @param id идентификатор рейса
+     * @return рейс
+     */
+    public Optional<Flight> getFlight(Long id) {
+        log.info("IN get - Flight: {} successfully found", id);
         return flightRepo.findById(id);
     }
 
-    public List<Flight> getAll() {
+    /**
+     * Получение всех рейсов
+     */
+    public List<Flight> getAllFlights() {
+        log.info("IN getAll - List of {} successfully found", "flights");
         return flightRepo.findAll();
     }
 
-    public Flight create(Plane plane, String departure, String destination,
-                         LocalDateTime departureTime, LocalDateTime arrivalTime) {
+    /**
+     * Создание рейса
+     *
+     * @param plane         самолет рейса
+     * @param departure     точка вылета
+     * @param destination   точка прибытия
+     * @param departureTime время вылета
+     * @param arrivalTime   время прибытия
+     * @return рейс
+     */
+    public Flight createFlight(Plane plane, String departure, String destination,
+                               LocalDateTime departureTime, LocalDateTime arrivalTime) {
         Flight flight = new Flight(plane, departure, destination, departureTime, arrivalTime);
         flightRepo.save(flight);
+        log.info("IN create - Flight: {} successfully created", flight.getId());
         return flight;
     }
 
-    public Optional<Flight> update(Long id, LocalDateTime departureTime,
-                                   LocalDateTime arrivalTime, Plane plane, String departure, String destination) {
+    /**
+     * Обновление рейса
+     *
+     * @param id            идентификатор рейса
+     * @param departureTime время вылета
+     * @param arrivalTime   время прибытия
+     * @param plane         самолет рейса
+     * @param departure     точка вылета
+     * @param destination   точка прибытия
+     * @return рейс
+     */
+    public Optional<Flight> updateFlight(Long id, LocalDateTime departureTime,
+                                         LocalDateTime arrivalTime, Plane plane, String departure, String destination) {
         Optional<Flight> flight = flightRepo.findById(id);
         if (flight.isPresent()) {
             if (departureTime != null) {
@@ -52,16 +87,29 @@ public class FlightService {
             if (!destination.isEmpty()) {
                 flight.get().setDestination(destination);
             }
+            log.info("IN update - Flight: {} successfully updated", id);
             flightRepo.save(flight.get());
             return flight;
         } else return Optional.empty();
     }
 
-    public void delete(Long id) {
+    /**
+     * Удаление рейса
+     *
+     * @param id идентификатор рейса
+     */
+
+    public void deleteFlight(Long id) {
         flightRepo.deleteById(id);
+        log.info("IN delete - Flight: {} successfully deleted", id);
     }
 
-    public void setPlaneNull(Long id) {
+    /**
+     * Обнуление значений самолета одинаковых с данным
+     *
+     * @param id идентификатор самолета
+     */
+    public void setPlaneFieldToNull(Long id) {
         List<Flight> flight = flightRepo.findAll();
         flight.forEach(flight1 -> {
             if (flight1.getPlane().getId().equals(id)) {
@@ -70,7 +118,13 @@ public class FlightService {
         });
     }
 
-    public List<Flight> flights(Plane plane) {
+    /**
+     * Показ списка рейсов самолета
+     *
+     * @param plane самолет рейса
+     * @return список рейсов самолета
+     */
+    public List<Flight> getFlightsByPlane(Plane plane) {
         List<Flight> flights = flightRepo.findAll();
         return flights.stream().filter(flight -> flight.getPlane().equals(plane)).collect(Collectors.toList());
     }

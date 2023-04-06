@@ -1,10 +1,8 @@
 package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.entity.Flight;
-import com.example.aviasimbir.entity.Ticket;
 import com.example.aviasimbir.requestresponse.CreateFlightRequest;
 import com.example.aviasimbir.requestresponse.FlightResponse;
-import com.example.aviasimbir.requestresponse.TicketResponse;
 import com.example.aviasimbir.requestresponse.UpdateFlightRequest;
 import com.example.aviasimbir.service.FlightService;
 import com.example.aviasimbir.service.PlaneService;
@@ -74,5 +72,10 @@ public class FlightController {
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deleteFlight(@PathVariable("id") Long id) {
         flightService.delete(id);
+    }
+
+    @RequestMapping(value = "/kazan", method = RequestMethod.GET)
+    public ResponseEntity<String> soldTicketsFromKazan() {
+        return ResponseEntity.ok("Tickets sold with departure Kazan : " + ticketService.ticketsToKazan());
     }
 }

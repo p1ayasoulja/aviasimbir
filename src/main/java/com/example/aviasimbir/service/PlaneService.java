@@ -37,5 +37,10 @@ public class PlaneService {
             planeRepo.deleteById(plane.get().getId());
         }
     }
+
+    public Long numberOfPlanes(Airline airline) {
+        List<Plane> planes = planeRepo.findAll();
+        return planes.stream().filter(plane -> plane.getAirline() == airline).count();
+    }
 }
 

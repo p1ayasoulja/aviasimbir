@@ -31,4 +31,9 @@ public class TicketController {
         return ResponseEntity.ok(ticketResponse);
     }
 
+    @RequestMapping(value = "/avgcommission", method = RequestMethod.GET)
+    public ResponseEntity<String> avgCommission() {
+        return ResponseEntity.ok("Average Commission = " + ticketService.avgCommission());
+
+    }
 }

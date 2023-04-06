@@ -62,4 +62,11 @@ public class AirlineController {
         airlineService.delete(id);
     }
 
+    @RequestMapping(value = "/{id}/planes", method = RequestMethod.GET)
+    public ResponseEntity<String> numberOfPlanes(@PathVariable("id") Long id) {
+        Optional<Airline> airline = airlineService.getAirline(id);
+        return airline.map(value -> ResponseEntity.ok("Number of planes of this airline = " + planeService.numberOfPlanes(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 }

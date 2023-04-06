@@ -54,4 +54,18 @@ public class TicketService {
         ticketRepo.deleteById(id);
     }
 
+    public Long ticketsToKazan() {
+        List<Ticket> tickets = ticketRepo.findAll();
+        return tickets.stream().filter(ticket -> ticket.getFlight().getDeparture().equals("Kazan") && ticket.getSold()).count();
+    }
+
+    public Long avgCommission() {
+        List<Ticket> tickets = ticketRepo.findAll();
+        long price=tickets.stream().filter(Ticket::getCommission).mapToLong(Ticket::getPrice).sum();
+        long sum = (long) ((long) (price) - ((price) / (1.025)));
+        long numb = tickets.stream().filter(Ticket::getCommission).count();
+        if (numb != 0) {
+            return sum / numb;
+        } else return (long) 0;
+    }
 }

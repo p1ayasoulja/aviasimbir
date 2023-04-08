@@ -2,35 +2,35 @@ package com.example.aviasimbir.service;
 
 import com.example.aviasimbir.entity.Airline;
 import com.example.aviasimbir.entity.Logger;
-import com.example.aviasimbir.repo.AirlineRepo;
-import com.example.aviasimbir.repo.LoggerRepo;
+import com.example.aviasimbir.repo.AirlineRepository;
+import com.example.aviasimbir.repo.LoggerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
 public class AirlineService {
-    private final AirlineRepo airlineRepo;
-    private final LoggerRepo loggerRepo;
+    private final AirlineRepository airlineRepository;
+    private final LoggerRepository loggerRepository;
 
-    public AirlineService(AirlineRepo airlineRepo, LoggerRepo loggerRepo) {
-        this.airlineRepo = airlineRepo;
-        this.loggerRepo = loggerRepo;
+    public AirlineService(AirlineRepository airlineRepository, LoggerRepository loggerRepository) {
+        this.airlineRepository = airlineRepository;
+        this.loggerRepository = loggerRepository;
     }
 
     /**
-     * Получение сущности авиалинии
+     * Получение сущности авиалинии по идентификатору
      *
      * @param id идентификатор авиалинии
      * @return авиалиния
      */
-    public Optional<Airline> getAirline(Long id) {
+    public Optional<Airline> findAirline(Long id) {
         log.info("IN getAirline - Airline: {} successfully found", id);
-        return airlineRepo.findById(id);
+        return airlineRepository.findById(id);
     }
 
     /**
@@ -40,7 +40,7 @@ public class AirlineService {
      */
     public List<Airline> getAllAirlines() {
         log.info("IN getAll - List of : {} successfully found", "airlines");
-        return airlineRepo.findAll();
+        return airlineRepository.findAll();
     }
 
     /**
@@ -51,7 +51,7 @@ public class AirlineService {
      */
     public Airline createAirline(String name) {
         Airline airline = new Airline(name);
-        airlineRepo.save(airline);
+        airlineRepository.save(airline);
         log.info("IN create - Airline: {} successfully created", name);
         return airline;
     }
@@ -64,11 +64,11 @@ public class AirlineService {
      * @return авиалиния
      */
     public Optional<Airline> updateAirline(Long id, String name) {
-        Optional<Airline> airline = airlineRepo.findById(id);
+        Optional<Airline> airline = airlineRepository.findById(id);
         if (airline.isPresent()) {
             if (!name.isEmpty()) {
                 airline.get().setName(name);
-                airlineRepo.save(airline.get());
+                airlineRepository.save(airline.get());
             }
             log.info("IN update - Airline: {} successfully updated", name);
             return airline;
@@ -79,16 +79,16 @@ public class AirlineService {
     }
 
     /**
-     * Удаление авиалинии
+     * Удалить авиалинию
      *
      * @param id - идентификатор авиалинии
      */
     public void deleteAirline(Long id) {
-        Optional<Airline> airline = airlineRepo.findById(id);
+        Optional<Airline> airline = airlineRepository.findById(id);
         if (airline.isPresent()) {
-            airlineRepo.deleteById(airline.get().getId());
+            airlineRepository.deleteById(airline.get().getId());
             log.info("IN delete - Airline: {} successfully deleted", id);
-            loggerRepo.save(new Logger(airline.get().toString() + " was deleted", LocalDateTime.now()));
+            loggerRepository.save(new Logger("Airline " + id + " was deleted", Instant.now()));
         }
     }
 }

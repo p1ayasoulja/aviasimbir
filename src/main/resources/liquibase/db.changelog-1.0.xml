@@ -3,8 +3,20 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <changeSet id="1.0" author="Andrey Galanov">
+        <sql>
+            CREATE SEQUENCE airline_id_seq;
+            CREATE SEQUENCE flight_id_seq;
+            CREATE SEQUENCE plane_id_seq;
+            CREATE SEQUENCE ticket_id_seq;
+            select setval('flight_id_seq', 5);
+            select setval('airline_id_seq', 3);
+            select setval('plane_id_seq', 5);
+            select setval('ticket_id_seq', 7);
+        </sql>
+    </changeSet>
+    <changeSet id="1.1" author="Andrey Galanov">
         <createTable tableName="plane">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="brand" type="varchar(200)">
@@ -20,7 +32,7 @@
             </column>
         </createTable>
         <createTable tableName="airline">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(200)">
@@ -28,9 +40,9 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1.1" author="Andrey Galanov">
+    <changeSet id="1.2" author="Andrey Galanov">
         <createTable tableName="flight">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="departure" type="varchar(255)">
@@ -49,7 +61,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1.2" author="Andrey Galanov">
+    <changeSet id="1.3" author="Andrey Galanov">
         <addForeignKeyConstraint baseColumnNames="plane"
                                  baseTableName="flight"
                                  constraintName="fk_flight_plane"
@@ -65,12 +77,12 @@
                                  referencedColumnNames="id"
                                  referencedTableName="airline"/>
     </changeSet>
-    <changeSet id="1.3" author="Andrey Galanov">
+    <changeSet id="1.4" author="Andrey Galanov">
         <createTable tableName="ticket">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="price" type="integer">
+            <column name="price" type="numeric">
                 <constraints nullable="false"/>
             </column>
             <column name="reserved" type="boolean">
@@ -87,7 +99,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1.4" author="Andrey Galanov">
+    <changeSet id="1.5" author="Andrey Galanov">
         <addForeignKeyConstraint baseColumnNames="flight"
                                  baseTableName="ticket"
                                  constraintName="fk_ticket_flight"
@@ -96,17 +108,17 @@
                                  referencedColumnNames="id"
                                  referencedTableName="flight"/>
     </changeSet>
-    <changeSet id="1.5" author="Andrey Galanov">
+    <changeSet id="1.6" author="Andrey Galanov">
         <insert tableName="airline">
-            <column name="id" value="1"/>
+            <column name="id" valueComputed="1"/>
             <column name="name" value="AirSerbia"/>
         </insert>
         <insert tableName="airline">
-            <column name="id" value="2"/>
+            <column name="id" valueComputed="2"/>
             <column name="name" value="FlyEmirates"/>
         </insert>
         <insert tableName="airline">
-            <column name="id" value="3"/>
+            <column name="id" valueComputed="3"/>
             <column name="name" value="FlyAstana"/>
         </insert>
         <insert tableName="plane">
@@ -242,7 +254,7 @@
             <column name="commission" value="false"/>
         </insert>
     </changeSet>
-    <changeSet id="1.6" author="Andrey Galanov">
+    <changeSet id="1.7" author="Andrey Galanov">
         <createTable tableName="log">
             <column name="id" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -255,5 +267,54 @@
             </column>
         </createTable>
     </changeSet>
+    <changeSet id="1.8" author="Andrey Galanov">
+        <sql>
+            CREATE SEQUENCE user_id_seq;
+            select setval('user_id_seq', 3);
+        </sql>
+    </changeSet>
+    <changeSet id="1.9" author="Andrey Galanov">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="airline" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2.0" author="Andrey Galanov">
+        <insert tableName="users">
+            <column name="id" value="1"/>
+            <column name="username" value="yandy1"/>
+            <column name="password" value="$2a$10$NGE2TGlNuqOkb3XOYAmW4uJDbpFM0dxPpx3VWY5iKr/rLV7ZP0b9y"/>
+            <column name="role" value="REPRESENTATIVE"/>
+            <column name="airline" value="1"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="2"/>
+            <column name="username" value="yandy2"/>
+            <column name="password" value="$2a$10$NGE2TGlNuqOkb3XOYAmW4uJDbpFM0dxPpx3VWY5iKr/rLV7ZP0b9y"/>
+            <column name="role" value="CASHIER"/>
+            <column name="airline" value="null"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="3"/>
+            <column name="username" value="yandy3"/>
+            <column name="password" value="$2a$10$NGE2TGlNuqOkb3XOYAmW4uJDbpFM0dxPpx3VWY5iKr/rLV7ZP0b9y"/>
+            <column name="role" value="CUSTOMER"/>
+            <column name="airline" value="null"/>
+        </insert>
+    </changeSet>
+
 
 </databaseChangeLog>

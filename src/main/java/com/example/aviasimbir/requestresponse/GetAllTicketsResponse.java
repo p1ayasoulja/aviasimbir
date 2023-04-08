@@ -1,25 +1,37 @@
 package com.example.aviasimbir.requestresponse;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.math.BigDecimal;
 
-@Api("Запрос на создание билета")
-public class CreateTicketRequest {
+@Api("Ответ на запрос по получению всех билеты")
+public class GetAllTicketsResponse {
+    @ApiModelProperty(value = "Идентификатор билета")
+    private Long id;
     @ApiModelProperty(value = "Цена билета")
     private BigDecimal price;
-    @ApiModelProperty(value = "Флаг наличия коммиссии")
+    @ApiModelProperty(value = "Флаг брони билета")
     private Boolean commission;
 
-    @JsonCreator
-    public CreateTicketRequest(@JsonProperty("price") BigDecimal price, @JsonProperty("commission") Boolean commission) {
+    public GetAllTicketsResponse(@JsonProperty("id") Long id,
+                                 @JsonProperty("price") BigDecimal price, @JsonProperty("commission") Boolean commission) {
+        this.id = id;
         this.price = price;
         this.commission = commission;
     }
 
+    @JsonProperty("id")
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @JsonProperty("price")
     public BigDecimal getPrice() {
         return price;
     }
@@ -28,6 +40,7 @@ public class CreateTicketRequest {
         this.price = price;
     }
 
+    @JsonProperty("commission")
     public Boolean getCommission() {
         return commission;
     }
@@ -36,3 +49,4 @@ public class CreateTicketRequest {
         this.commission = commission;
     }
 }
+

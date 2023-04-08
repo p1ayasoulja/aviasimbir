@@ -2,21 +2,28 @@ package com.example.aviasimbir.requestresponse;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 
+@Api("Запрос на создание самолета")
 public class CreatePlaneRequest {
+    @ApiModelProperty(value = "Бренд самолета")
     private String brand;
+    @ApiModelProperty(value = "Модель самолета")
     private String model;
+    @ApiModelProperty(value = "Число мест в самолете")
     private Integer seats;
-    private Long airline;
+    @ApiModelProperty(value = "Идентификатор авиалинии самолета")
+    private Long airlineId;
 
     @JsonCreator
     public CreatePlaneRequest(@JsonProperty("brand") String brand, @JsonProperty("model") String model,
                               @JsonProperty("seats") Integer seats,
-                              @JsonProperty("airline") Long airline) {
+                              @JsonProperty("airlineId") Long airlineId) {
         this.brand = brand;
         this.model = model;
         this.seats = seats;
-        this.airline = airline;
+        this.airlineId = airlineId;
     }
 
     public String getBrand() {
@@ -43,11 +50,11 @@ public class CreatePlaneRequest {
         this.seats = seats;
     }
 
-    public Long getAirline() {
-        return airline;
+    public Long getAirlineId() {
+        return airlineId;
     }
 
-    public void setAirline(Long airline) {
-        this.airline = airline;
+    public void setAirlineId(Long airlineId) {
+        this.airlineId = airlineId;
     }
 }

@@ -3,25 +3,28 @@ package com.example.aviasimbir.service;
 import com.example.aviasimbir.entity.Flight;
 import com.example.aviasimbir.entity.Logger;
 import com.example.aviasimbir.entity.Plane;
-import com.example.aviasimbir.repo.FlightRepo;
-import com.example.aviasimbir.repo.LoggerRepo;
+import com.example.aviasimbir.repo.FlightRepository;
+import com.example.aviasimbir.repo.LoggerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class FlightService {
-    private final FlightRepo flightRepo;
-    private final LoggerRepo loggerRepo;
+    private final FlightRepository flightRepository;
+    private final LoggerRepository loggerRepository;
 
-    public FlightService(FlightRepo flightRepo, LoggerRepo loggerRepo) {
-        this.flightRepo = flightRepo;
-        this.loggerRepo = loggerRepo;
+    public FlightService(FlightRepository flightRepository, LoggerRepository loggerRepository) {
+        this.flightRepository = flightRepository;
+        this.loggerRepository = loggerRepository;
     }
 
     /**
@@ -30,9 +33,9 @@ public class FlightService {
      * @param id идентификатор рейса
      * @return рейс
      */
-    public Optional<Flight> getFlight(Long id) {
+    public Optional<Flight> findFlight(Long id) {
         log.info("IN getFlight - Flight: {} successfully found", id);
-        return flightRepo.findById(id);
+        return flightRepository.findById(id);
     }
 
     /**
@@ -40,11 +43,11 @@ public class FlightService {
      */
     public List<Flight> getAllFlights() {
         log.info("IN getAllFlights - List of {} successfully found", "flights");
-        return flightRepo.findAll();
+        return flightRepository.findAll();
     }
 
     /**
-     * Создание рейса
+     * Создать рейс
      *
      * @param plane         самолет рейса
      * @param departure     точка вылета
@@ -54,15 +57,15 @@ public class FlightService {
      * @return рейс
      */
     public Flight createFlight(Plane plane, String departure, String destination,
-                               LocalDateTime departureTime, LocalDateTime arrivalTime) {
+                               ZonedDateTime departureTime, ZonedDateTime arrivalTime) {
         Flight flight = new Flight(plane, departure, destination, departureTime, arrivalTime);
-        flightRepo.save(flight);
+        flightRepository.save(flight);
         log.info("IN createFlight - Flight: {} successfully created", flight.getId());
         return flight;
     }
 
     /**
-     * Обновление рейса
+     * Обновить рейс
      *
      * @param id            идентификатор рейса
      * @param departureTime время вылета
@@ -72,71 +75,69 @@ public class FlightService {
      * @param destination   точка прибытия
      * @return рейс
      */
-    public Optional<Flight> updateFlight(Long id, LocalDateTime departureTime,
-                                         LocalDateTime arrivalTime, Plane plane, String departure, String destination) {
-        Optional<Flight> flight = flightRepo.findById(id);
-        if (flight.isPresent()) {
-            if (departureTime != null) {
-                flight.get().setDepartureTime(departureTime);
-            }
-            if (arrivalTime != null) {
-                flight.get().setArrivalTime(arrivalTime);
-            }
-            if (plane != null) {
-                flight.get().setPlane(plane);
-            }
-            if (!departure.isEmpty()) {
-                flight.get().setDeparture(departure);
-            }
-            if (!destination.isEmpty()) {
-                flight.get().setDestination(destination);
-            }
-            log.info("IN updateFlight - Flight: {} successfully updated", id);
-            flightRepo.save(flight.get());
-            return flight;
-        } else return Optional.empty();
+    public Optional<Flight> updateFlight(Long id, ZonedDateTime departureTime,
+                                         ZonedDateTime arrivalTime, Plane plane,
+                                         String departure, String destination) {
+        Optional<Flight> optionalFlight = flightRepository.findById(id);
+        if (optionalFlight.isEmpty()) {
+            return Optional.empty();
+        }
+        Flight flight = optionalFlight.get();
+        if (Objects.nonNull(departureTime)) {
+            flight.setDepartureTime(departureTime);
+        }
+        if (Objects.nonNull(arrivalTime)) {
+            flight.setArrivalTime(arrivalTime);
+        }
+        if (Objects.nonNull(plane)) {
+            flight.setPlane(plane);
+        }
+        if (StringUtils.hasText(departure)) {
+            flight.setDeparture(departure);
+        }
+        if (StringUtils.hasText(destination)) {
+            flight.setDestination(destination);
+        }
+        if (!flightRepository.existsById(flight.getId())) {
+            return Optional.empty();
+        }
+        flightRepository.save(flight);
+        log.info("IN updateFlight - Flight: {} successfully updated", id);
+        return optionalFlight;
     }
 
     /**
-     * Удаление рейса
+     * Удалить рейс
      *
      * @param id идентификатор рейса
      */
 
     public void deleteFlight(Long id) {
-        Optional<Flight> flight = flightRepo.findById(id);
-        if (flight.isPresent()) {
-            flight.get().setPlane(null);
-            flightRepo.deleteById(flight.get().getId());
-            log.info("IN deleteFlight - Flight: {} successfully deleted", id);
-            loggerRepo.save(new Logger(flight.get().toString() + " was deleted", LocalDateTime.now()));
-        }
+        flightRepository.deleteById(id);
+        log.info("IN deleteFlight - Flight: {} successfully deleted", id);
+        loggerRepository.save(new Logger("Flight " + id + " was deleted", Instant.now()));
     }
 
     /**
-     * Обнуление значений самолета одинаковых с данным
+     * Получить список рейсов самолетов
      *
-     * @param id идентификатор самолета
+     * @param planes список самолетов
+     * @return список рейсов самолетов
      */
-    public void setPlaneFieldToNull(Long id) {
-        List<Flight> flight = flightRepo.findAll();
-        flight.forEach(flight1 -> {
-            if (flight1.getPlane().getId().equals(id)) {
-                flight1.setPlane(null);
-            }
-        });
-        log.info("IN setPlaneFieldToNull - PlaneField of flights by {} successfully updated to null", "plane");
+    public List<Flight> getFlightsByPlanes(List<Plane> planes) {
+        log.info("IN getFlightsByPlane - List of flights successfully found");
+        List<Flight> flights = new ArrayList<>();
+        planes.forEach(plane -> flights.addAll(flightRepository.findAllByPlane(plane)));
+        return flights;
     }
-
     /**
-     * Показ списка рейсов самолета
+     * Получение списка рейсов самолета
      *
-     * @param plane самолет рейса
+     * @param plane самолет
      * @return список рейсов самолета
      */
     public List<Flight> getFlightsByPlane(Plane plane) {
-        List<Flight> flights = flightRepo.findAll();
-        log.info("IN getFlightsByPlane - List of : {} successfully updated", "flights");
-        return flights.stream().filter(flight -> flight.getPlane().equals(plane)).collect(Collectors.toList());
+        log.info("IN getFlightsByPlane - List of flights successfully found");
+        return flightRepository.findAllByPlane(plane);
     }
 }

@@ -1,18 +1,28 @@
 package com.example.aviasimbir.requestresponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
+@Api("Ответ на запрос получения информации о рейсе")
 public class FlightResponse {
-
+    @ApiModelProperty(value = "Идентификатор рейса")
+    private Long id;
+    @ApiModelProperty(value = "Имя авиалинии рейса")
     private String airline;
+    @ApiModelProperty(value = "Место вылета")
     private String departure;
+    @ApiModelProperty(value = "Место назначения")
     private String destination;
-    private LocalDateTime departureTime;
-    private LocalDateTime arrivalTime;
+    @ApiModelProperty(value = "Время вылета")
+    private ZonedDateTime departureTime;
+    @ApiModelProperty(value = "Время прилета")
+    private ZonedDateTime arrivalTime;
 
-    public FlightResponse(String airline, String departure, String destination, LocalDateTime departureTime, LocalDateTime arrivalTime) {
+    public FlightResponse(Long id, String airline, String departure, String destination, ZonedDateTime departureTime, ZonedDateTime arrivalTime) {
+        this.id = id;
         this.airline = airline;
         this.departure = departure;
         this.destination = destination;
@@ -48,20 +58,29 @@ public class FlightResponse {
     }
 
     @JsonProperty("departureTime")
-    public LocalDateTime getDepartureTime() {
+    public ZonedDateTime getDepartureTime() {
         return departureTime;
     }
 
-    public void setDepartureTime(LocalDateTime departureTime) {
+    public void setDepartureTime(ZonedDateTime departureTime) {
         this.departureTime = departureTime;
     }
 
     @JsonProperty("arrivalTime")
-    public LocalDateTime getArrivalTime() {
+    public ZonedDateTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(LocalDateTime arrivalTime) {
+    public void setArrivalTime(ZonedDateTime arrivalTime) {
         this.arrivalTime = arrivalTime;
+    }
+
+    @JsonProperty("id")
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

@@ -1,16 +1,18 @@
 package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.entity.Flight;
-import com.example.aviasimbir.requestresponse.CreateFlightRequest;
-import com.example.aviasimbir.requestresponse.FlightResponse;
-import com.example.aviasimbir.requestresponse.UpdateFlightRequest;
+import com.example.aviasimbir.entity.Ticket;
+import com.example.aviasimbir.requestresponse.*;
 import com.example.aviasimbir.service.FlightService;
 import com.example.aviasimbir.service.PlaneService;
 import com.example.aviasimbir.service.TicketService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/flight")
@@ -26,56 +28,63 @@ public class FlightController {
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @ApiOperation("Получить информацию о рейсе")
     public ResponseEntity<FlightResponse> getFlight(@PathVariable("id") Long id) {
-        Optional<Flight> flight = flightService.getFlight(id);
+        Optional<Flight> flight = flightService.findFlight(id);
         if (flight.isPresent()) {
-            FlightResponse flightResponse = new FlightResponse(flight.get().getPlane().getAirline().getName(), flight.get().getDeparture(),
+            FlightResponse flightResponse = new FlightResponse(flight.get().getId(), flight.get().getPlane().getAirline().getName(), flight.get().getDeparture(),
                     flight.get().getDestination(), flight.get().getDepartureTime(), flight.get().getArrivalTime());
             return ResponseEntity.ok(flightResponse);
-        } else return ResponseEntity.noContent().build();
+        } else return ResponseEntity.notFound().build();
     }
 
     @RequestMapping(method = RequestMethod.POST)
+    @ApiOperation("Создать рейс")
     public ResponseEntity<FlightResponse> createFlight(@RequestBody CreateFlightRequest createFlightRequest) {
-        Flight flight = flightService.createFlight(planeService.getPlane(createFlightRequest.getPlane_id()).get(), createFlightRequest.getDeparture(),
+        Flight flight = flightService.createFlight(planeService.findPlane(createFlightRequest.getPlaneId()).get(), createFlightRequest.getDeparture(),
                 createFlightRequest.getDestination(), createFlightRequest.getDepartureTime(),
                 createFlightRequest.getArrivalTime());
-        Integer price = createFlightRequest.getTicket_price();
-        if (createFlightRequest.getCommission()) {
-            price = (int) (price * 1.025);
-        }
-        for (int i = 0; i < flight.getPlane().getSeats() / 2; i++) {
-            ticketService.createTicket(flight, price,
-                    false, false, createFlightRequest.getCommission());
-        }
-        FlightResponse flightResponse = new FlightResponse(flight.getPlane().getAirline().getName(), flight.getDeparture(),
+        ticketService.createTicketsForCreatedFlight(flight.getId(), createFlightRequest.getCommission(), flight.getPlane().getSeats(), createFlightRequest.getTicketPrice());
+        FlightResponse flightResponse = new FlightResponse(flight.getId(), flight.getPlane().getAirline().getName(), flight.getDeparture(),
                 flight.getDestination(), flight.getDepartureTime(), flight.getArrivalTime());
         return ResponseEntity.ok(flightResponse);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PATCH)
+    @ApiOperation("Обновить рейс")
     public ResponseEntity<FlightResponse> updateFlight(@PathVariable("id") Long id, @RequestBody UpdateFlightRequest updateFlightRequest) {
-        Optional<Flight> flight = flightService.getFlight(id);
-        if (flight.isPresent()) {
-            flightService.updateFlight(id, updateFlightRequest.getDepartureTime(), updateFlightRequest.getArrivalTime(),
-                    planeService.getPlane(updateFlightRequest.getPlane_id()).get(),
-                    updateFlightRequest.getDeparture(), updateFlightRequest.getDestination());
+        Optional<Flight> flight = flightService.updateFlight(id, updateFlightRequest.getDepartureTime(), updateFlightRequest.getArrivalTime(),
+                planeService.findPlane(updateFlightRequest.getPlaneId()).get(),
+                updateFlightRequest.getDeparture(), updateFlightRequest.getDestination());
 
-            FlightResponse flightResponse = new FlightResponse(flight.get().getPlane().getAirline().getName(),
-                    flight.get().getDeparture(), flight.get().getDestination(), flight.get().getDepartureTime(),
-                    flight.get().getArrivalTime());
-            return ResponseEntity.ok(flightResponse);
-        }
-        return ResponseEntity.notFound().build();
+        FlightResponse flightResponse = new FlightResponse(flight.get().getId(), flight.get().getPlane().getAirline().getName(),
+                flight.get().getDeparture(), flight.get().getDestination(), flight.get().getDepartureTime(),
+                flight.get().getArrivalTime());
+        return ResponseEntity.ok(flightResponse);
+    }
+
+    @RequestMapping(value = "/{id}/addticket", method = RequestMethod.POST)
+    @ApiOperation("Добавить билет на рейс")
+    public ResponseEntity<TicketResponse> createTicketForFlight(@PathVariable("id") Long id, @RequestBody CreateTicketRequest createTickerRequest) {
+        Ticket ticket = ticketService.createTicket(flightService.findFlight(id).get(), createTickerRequest.getPrice(),
+                false, false, createTickerRequest.getCommission());
+        TicketResponse ticketResponse = new TicketResponse(ticket.getFlight().getDeparture(), ticket.getFlight().getDestination(),
+                ticket.getPrice(), ticket.getReserved(), ticket.getSold());
+        return ResponseEntity.ok(ticketResponse);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    @ApiOperation("Удалить рейс")
     public void deleteFlight(@PathVariable("id") Long id) {
         flightService.deleteFlight(id);
     }
 
-    @RequestMapping(value = "/kazan", method = RequestMethod.GET)
-    public ResponseEntity<String> getSoldTicketsFromKazanCount() {
-        return ResponseEntity.ok("Tickets sold with departure Kazan : " + ticketService.getTicketsToKazanCount());
+    @RequestMapping(value = "/{id}/tickets", method = RequestMethod.GET)
+    @ApiOperation("Показать список досутпных билетов")
+    public ResponseEntity<List<GetAllAvailableTicketsResponse>> getAllAvailableTickets(@PathVariable("id") Long id) {
+        List<Ticket> tickets = ticketService.getAllAvailableTicketsByFlight(flightService.findFlight(id).orElse(null));
+        List<GetAllAvailableTicketsResponse> getAllAvailableTicketsResponse = tickets.stream()
+                .map(ticket -> new GetAllAvailableTicketsResponse(ticket.getId(), ticket.getPrice())).collect(Collectors.toList());
+        return ResponseEntity.ok(getAllAvailableTicketsResponse);
     }
 }

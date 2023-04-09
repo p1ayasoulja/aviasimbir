@@ -5,7 +5,8 @@ import javax.persistence.*;
 @Entity
 public class Plane {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "plane_id_generator")
+    @SequenceGenerator(name = "plane_id_generator", sequenceName = "plane_id_seq", allocationSize = 1)
     private Long id;
     @Column(name = "brand")
     private String brand;
@@ -14,9 +15,11 @@ public class Plane {
     @Column(name = "seats")
     private int seats;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "airline")
     private Airline airline;
+    @OneToOne(mappedBy = "plane", cascade = CascadeType.ALL)
+    private Flight flight;
 
     public Plane() {
     }

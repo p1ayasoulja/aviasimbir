@@ -4,13 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 
 public class PlaneResponse {
+    private Long id;
     private String brand;
     private String model;
     private int seats;
     private String airline;
 
-    public PlaneResponse(String brand, String model,
+    public PlaneResponse(Long id, String brand, String model,
                          int seats, String airline) {
+        this.id = id;
         this.brand = brand;
         this.model = model;
         this.seats = seats;
@@ -51,5 +53,14 @@ public class PlaneResponse {
 
     public void setAirline(String airline) {
         this.airline = airline;
+    }
+
+    @JsonProperty("id")
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

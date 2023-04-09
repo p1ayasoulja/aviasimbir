@@ -1,17 +1,19 @@
 package com.example.aviasimbir.entity;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Entity
 public class Ticket {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "ticket_id_generator")
+    @SequenceGenerator(name = "ticket_id_generator", sequenceName = "ticket_id_seq", allocationSize = 1)
     private Long id;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "flight")
     private Flight flight;
     @Column(name = "price")
-    private Integer price;
+    private BigDecimal price;
     @Column(name = "reserved")
     private Boolean reserved;
     @Column(name = "sold")
@@ -22,7 +24,7 @@ public class Ticket {
     public Ticket() {
     }
 
-    public Ticket(Flight flight, Integer price, Boolean reserved, Boolean sold, Boolean commission) {
+    public Ticket(Flight flight, BigDecimal price, Boolean reserved, Boolean sold, Boolean commission) {
         this.flight = flight;
         this.price = price;
         this.reserved = reserved;
@@ -46,11 +48,11 @@ public class Ticket {
         this.flight = flight;
     }
 
-    public Integer getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

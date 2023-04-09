@@ -1,14 +1,18 @@
 package com.example.aviasimbir.entity;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 public class Airline {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "airline_id_generator")
+    @SequenceGenerator(name = "airline_id_generator", sequenceName = "airline_id_seq", allocationSize = 1)
     private Long id;
     @Column(name = "name")
     private String name;
+    @OneToMany(mappedBy = "airline", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Plane> planes;
 
     public Airline() {
     }

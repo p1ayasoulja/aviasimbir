@@ -1,15 +1,16 @@
 package com.example.aviasimbir.entity;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Entity
 public class Flight {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "flight_id_generator")
+    @SequenceGenerator(name = "flight_id_generator", sequenceName = "flight_id_seq", allocationSize = 1)
     private Long id;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "plane")
     private Plane plane;
     @Column(name = "departure")
@@ -17,9 +18,9 @@ public class Flight {
     @Column(name = "destination")
     private String destination;
     @Column(name = "departure_time")
-    private LocalDateTime departureTime;
+    private ZonedDateTime departureTime;
     @Column(name = "arrival_time")
-    private LocalDateTime arrivalTime;
+    private ZonedDateTime arrivalTime;
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Ticket> tickets;
 
@@ -27,7 +28,7 @@ public class Flight {
     }
 
     public Flight(Plane plane, String departure, String destination,
-                  LocalDateTime departureTime, LocalDateTime arrivalTime) {
+                  ZonedDateTime departureTime, ZonedDateTime arrivalTime) {
         this.plane = plane;
         this.departure = departure;
         this.destination = destination;
@@ -67,19 +68,19 @@ public class Flight {
         this.destination = destination;
     }
 
-    public LocalDateTime getDepartureTime() {
+    public ZonedDateTime getDepartureTime() {
         return departureTime;
     }
 
-    public void setDepartureTime(LocalDateTime departureTime) {
+    public void setDepartureTime(ZonedDateTime departureTime) {
         this.departureTime = departureTime;
     }
 
-    public LocalDateTime getArrivalTime() {
+    public ZonedDateTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(LocalDateTime arrivalTime) {
+    public void setArrivalTime(ZonedDateTime arrivalTime) {
         this.arrivalTime = arrivalTime;
     }
 

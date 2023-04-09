@@ -26,9 +26,9 @@ public class PlaneController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<PlaneResponse> getPlane(@PathVariable("id") Long id) {
-        Optional<Plane> plane = planeService.getPlane(id);
+        Optional<Plane> plane = planeService.findPlane(id);
         if (plane.isPresent()) {
-            PlaneResponse getPlaneResponse = new PlaneResponse(plane.get().getBrand(), plane.get().getModel(),
+            PlaneResponse getPlaneResponse = new PlaneResponse(plane.get().getId(), plane.get().getBrand(), plane.get().getModel(),
                     plane.get().getSeats(), plane.get().getAirline().getName());
             return ResponseEntity.ok(getPlaneResponse);
         } else return ResponseEntity.notFound().build();
@@ -37,14 +37,13 @@ public class PlaneController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<PlaneResponse> createPlane(@RequestBody CreatePlaneRequest createPlaneRequest) {
         Plane plane = planeService.createPlane(createPlaneRequest.getBrand(), createPlaneRequest.getModel(),
-                createPlaneRequest.getSeats(), airlineService.getAirline(createPlaneRequest.getAirline()).get());
-        PlaneResponse planeResponse = new PlaneResponse(plane.getBrand(), plane.getModel(), plane.getSeats(), plane.getAirline().getName());
+                createPlaneRequest.getSeats(), airlineService.getAirline(createPlaneRequest.getAirlineId()).get());
+        PlaneResponse planeResponse = new PlaneResponse(plane.getId(), plane.getBrand(), plane.getModel(), plane.getSeats(), plane.getAirline().getName());
         return ResponseEntity.ok(planeResponse);
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
     public void deletePlane(@PathVariable("id") Long id) {
-        flightService.setPlaneFieldToNull(id);
         planeService.deletePlane(id);
     }
 }

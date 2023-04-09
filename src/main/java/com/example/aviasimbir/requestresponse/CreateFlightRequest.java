@@ -3,39 +3,40 @@ package com.example.aviasimbir.requestresponse;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 
 public class CreateFlightRequest {
-    private Long plane_id;
+    private Long planeId;
     private String departure;
     private String destination;
-    private LocalDateTime departureTime;
-    private LocalDateTime arrivalTime;
-    private Integer ticket_price;
+    private ZonedDateTime departureTime;
+    private ZonedDateTime arrivalTime;
+    private BigDecimal ticketPrice;
     private Boolean commission;
 
     @JsonCreator
-    public CreateFlightRequest(@JsonProperty("plane") Long plane_id, @JsonProperty("departure") String departure,
+    public CreateFlightRequest(@JsonProperty("planeId") Long planeId, @JsonProperty("departure") String departure,
                                @JsonProperty("destination") String destination,
-                               @JsonProperty("departureTime") LocalDateTime departureTime,
-                               @JsonProperty("arrivalTime") LocalDateTime arrivalTime,
-                               @JsonProperty("ticket price") Integer ticket_price,
+                               @JsonProperty("departureTime") ZonedDateTime departureTime,
+                               @JsonProperty("arrivalTime") ZonedDateTime arrivalTime,
+                               @JsonProperty("ticketPrice") BigDecimal ticketPrice,
                                @JsonProperty("commission") Boolean commission) {
-        this.plane_id = plane_id;
+        this.planeId = planeId;
         this.departure = departure;
         this.destination = destination;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
-        this.ticket_price = ticket_price;
+        this.ticketPrice = ticketPrice;
         this.commission = commission;
     }
 
-    public Long getPlane_id() {
-        return plane_id;
+    public Long getPlaneId() {
+        return planeId;
     }
 
-    public void setPlane_id(Long plane_id) {
-        this.plane_id = plane_id;
+    public void setPlaneId(Long planeId) {
+        this.planeId = planeId;
     }
 
     public String getDeparture() {
@@ -54,28 +55,28 @@ public class CreateFlightRequest {
         this.destination = destination;
     }
 
-    public LocalDateTime getDepartureTime() {
+    public ZonedDateTime getDepartureTime() {
         return departureTime;
     }
 
-    public void setDepartureTime(LocalDateTime departureTime) {
+    public void setDepartureTime(ZonedDateTime departureTime) {
         this.departureTime = departureTime;
     }
 
-    public LocalDateTime getArrivalTime() {
+    public ZonedDateTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(LocalDateTime arrivalTime) {
+    public void setArrivalTime(ZonedDateTime arrivalTime) {
         this.arrivalTime = arrivalTime;
     }
 
-    public Integer getTicket_price() {
-        return ticket_price;
+    public BigDecimal getTicketPrice() {
+        return ticketPrice;
     }
 
-    public void setTicket_price(Integer ticket_price) {
-        this.ticket_price = ticket_price;
+    public void setTicketPrice(BigDecimal ticketPrice) {
+        this.ticketPrice = ticketPrice;
     }
 
     public Boolean getCommission() {

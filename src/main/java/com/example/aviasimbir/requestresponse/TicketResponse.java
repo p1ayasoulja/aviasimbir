@@ -2,15 +2,17 @@ package com.example.aviasimbir.requestresponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigDecimal;
+
 public class TicketResponse {
 
     private String departure;
     private String destination;
-    private Integer price;
+    private BigDecimal price;
     private Boolean reserved;
     private Boolean sold;
 
-    public TicketResponse(String departure, String destination, Integer price, Boolean reserved,
+    public TicketResponse(String departure, String destination, BigDecimal price, Boolean reserved,
                           Boolean sold) {
         this.departure = departure;
         this.destination = destination;
@@ -38,11 +40,11 @@ public class TicketResponse {
     }
 
     @JsonProperty("price")
-    public Integer getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 

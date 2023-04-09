@@ -2,17 +2,18 @@ package com.example.aviasimbir.requestresponse;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class FlightResponse {
-
+    private Long id;
     private String airline;
     private String departure;
     private String destination;
-    private LocalDateTime departureTime;
-    private LocalDateTime arrivalTime;
+    private ZonedDateTime departureTime;
+    private ZonedDateTime arrivalTime;
 
-    public FlightResponse(String airline, String departure, String destination, LocalDateTime departureTime, LocalDateTime arrivalTime) {
+    public FlightResponse(Long id, String airline, String departure, String destination, ZonedDateTime departureTime, ZonedDateTime arrivalTime) {
+        this.id = id;
         this.airline = airline;
         this.departure = departure;
         this.destination = destination;
@@ -48,20 +49,29 @@ public class FlightResponse {
     }
 
     @JsonProperty("departureTime")
-    public LocalDateTime getDepartureTime() {
+    public ZonedDateTime getDepartureTime() {
         return departureTime;
     }
 
-    public void setDepartureTime(LocalDateTime departureTime) {
+    public void setDepartureTime(ZonedDateTime departureTime) {
         this.departureTime = departureTime;
     }
 
     @JsonProperty("arrivalTime")
-    public LocalDateTime getArrivalTime() {
+    public ZonedDateTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(LocalDateTime arrivalTime) {
+    public void setArrivalTime(ZonedDateTime arrivalTime) {
         this.arrivalTime = arrivalTime;
+    }
+
+    @JsonProperty("id")
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

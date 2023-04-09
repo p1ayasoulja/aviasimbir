@@ -7,16 +7,16 @@ public class CreatePlaneRequest {
     private String brand;
     private String model;
     private Integer seats;
-    private Long airline;
+    private Long airlineId;
 
     @JsonCreator
     public CreatePlaneRequest(@JsonProperty("brand") String brand, @JsonProperty("model") String model,
                               @JsonProperty("seats") Integer seats,
-                              @JsonProperty("airline") Long airline) {
+                              @JsonProperty("airlineId") Long airlineId) {
         this.brand = brand;
         this.model = model;
         this.seats = seats;
-        this.airline = airline;
+        this.airlineId = airlineId;
     }
 
     public String getBrand() {
@@ -43,11 +43,11 @@ public class CreatePlaneRequest {
         this.seats = seats;
     }
 
-    public Long getAirline() {
-        return airline;
+    public Long getAirlineId() {
+        return airlineId;
     }
 
-    public void setAirline(Long airline) {
-        this.airline = airline;
+    public void setAirlineId(Long airlineId) {
+        this.airlineId = airlineId;
     }
 }

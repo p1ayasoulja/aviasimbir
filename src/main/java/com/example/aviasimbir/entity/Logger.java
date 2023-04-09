@@ -1,25 +1,25 @@
 package com.example.aviasimbir.entity;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "log")
 public class Logger {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     @Column(name = "title")
     private String title;
     @Column(name = "time")
-    private LocalDateTime localDateTime;
+    private Instant instant;
 
     public Logger() {
     }
 
-    public Logger(String title, LocalDateTime localDateTime) {
+    public Logger(String title, Instant instant) {
         this.title = title;
-        this.localDateTime = localDateTime;
+        this.instant = instant;
     }
 
     public Long getId() {

@@ -3,33 +3,33 @@ package com.example.aviasimbir.requestresponse;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public class UpdateFlightRequest {
-    private Long plane_id;
+    private Long planeId;
     private String departure;
     private String destination;
-    private LocalDateTime departureTime;
-    private LocalDateTime arrivalTime;
+    private ZonedDateTime departureTime;
+    private ZonedDateTime arrivalTime;
 
     @JsonCreator
-    public UpdateFlightRequest(@JsonProperty("plane") Long plane_id, @JsonProperty("departure") String departure,
+    public UpdateFlightRequest(@JsonProperty("planeId") Long planeId, @JsonProperty("departure") String departure,
                                @JsonProperty("destination") String destination,
-                               @JsonProperty("departureTime") LocalDateTime departureTime,
-                               @JsonProperty("arrivalTime") LocalDateTime arrivalTime) {
-        this.plane_id = plane_id;
+                               @JsonProperty("departureTime") ZonedDateTime departureTime,
+                               @JsonProperty("arrivalTime") ZonedDateTime arrivalTime) {
+        this.planeId = planeId;
         this.departure = departure;
         this.destination = destination;
         this.departureTime = departureTime;
         this.arrivalTime = arrivalTime;
     }
 
-    public Long getPlane_id() {
-        return plane_id;
+    public Long getPlaneId() {
+        return planeId;
     }
 
-    public void setPlane_id(Long plane_id) {
-        this.plane_id = plane_id;
+    public void setPlaneId(Long planeId) {
+        this.planeId = planeId;
     }
 
     public String getDeparture() {
@@ -48,19 +48,19 @@ public class UpdateFlightRequest {
         this.destination = destination;
     }
 
-    public LocalDateTime getDepartureTime() {
+    public ZonedDateTime getDepartureTime() {
         return departureTime;
     }
 
-    public void setDepartureTime(LocalDateTime departureTime) {
+    public void setDepartureTime(ZonedDateTime departureTime) {
         this.departureTime = departureTime;
     }
 
-    public LocalDateTime getArrivalTime() {
+    public ZonedDateTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(LocalDateTime arrivalTime) {
+    public void setArrivalTime(ZonedDateTime arrivalTime) {
         this.arrivalTime = arrivalTime;
     }
 }

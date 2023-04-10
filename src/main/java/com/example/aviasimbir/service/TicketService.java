@@ -39,7 +39,7 @@ public class TicketService {
      * @param id идентификатор билета
      * @return билет
      */
-    public Optional<Ticket> getTicket(Long id) {
+    public Optional<Ticket> findTicket(Long id) {
         log.info("IN getTicket - Ticket: {} successfully found", id);
         return ticketRepository.findById(id);
     }
@@ -169,7 +169,7 @@ public class TicketService {
      * @param flight рейс билета
      * @return число проданных билетов по рейсу
      */
-    public Long getSoldTicketCountByFlight(Flight flight) {
+    public Long getSoldTicketsCountByFlight(Flight flight) {
         TypedQuery<Long> query = entityManager.createQuery(
                 "SELECT COUNT(t) FROM Ticket t WHERE t.flight = :flight AND t.sold = true",
                 Long.class
@@ -189,7 +189,7 @@ public class TicketService {
     public Long getAllSoldTicketsCountByFlights(List<Flight> flights) {
         Long sum = 0L;
         for (Flight flight : flights) {
-            sum += getSoldTicketCountByFlight(flight);
+            sum += getSoldTicketsCountByFlight(flight);
         }
         return sum;
     }

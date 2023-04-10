@@ -31,7 +31,7 @@ public class AirlineController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<AirlineResponse> getAirline(@PathVariable("id") Long id) {
-        Optional<Airline> airline = airlineService.getAirline(id);
+        Optional<Airline> airline = airlineService.findAirline(id);
         if (airline.isPresent()) {
             AirlineResponse airlineResponse = new AirlineResponse(airline.get().getId(), airline.get().getName());
             return ResponseEntity.ok(airlineResponse);
@@ -66,7 +66,7 @@ public class AirlineController {
 
     @GetMapping("/{id}/sold")
     public ResponseEntity<Long> getNumberOfSoldTickets(@PathVariable Long id) {
-        long totalSoldTickets = airlineService.getAirline(id)
+        long totalSoldTickets = airlineService.findAirline(id)
                 .map(airline -> ticketService.getAllSoldTicketsCountByFlights(
                         flightService.getFlightsByPlane(planeService.getListOfPlanes(airline))))
                 .orElse(0L);

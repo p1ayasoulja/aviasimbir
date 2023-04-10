@@ -1,6 +1,7 @@
 package com.example.aviasimbir.entity;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 public class Plane {
@@ -18,8 +19,8 @@ public class Plane {
     @ManyToOne
     @JoinColumn(name = "airline")
     private Airline airline;
-    @OneToOne(mappedBy = "plane", cascade = CascadeType.ALL)
-    private Flight flight;
+    @OneToMany(mappedBy = "plane", cascade = CascadeType.ALL)
+    private List<Flight> flights;
 
     public Plane() {
     }

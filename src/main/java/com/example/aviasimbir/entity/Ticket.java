@@ -9,7 +9,7 @@ public class Ticket {
     @GeneratedValue(generator = "ticket_id_generator")
     @SequenceGenerator(name = "ticket_id_generator", sequenceName = "ticket_id_seq", allocationSize = 1)
     private Long id;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "flight")
     private Flight flight;
     @Column(name = "price")

@@ -26,7 +26,7 @@ public class FlightController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public ResponseEntity<FlightResponse> getFlight(@PathVariable("id") Long id) {
-        Optional<Flight> flight = flightService.getFlight(id);
+        Optional<Flight> flight = flightService.findFlight(id);
         if (flight.isPresent()) {
             FlightResponse flightResponse = new FlightResponse(flight.get().getId(), flight.get().getPlane().getAirline().getName(), flight.get().getDeparture(),
                     flight.get().getDestination(), flight.get().getDepartureTime(), flight.get().getArrivalTime());
@@ -59,7 +59,7 @@ public class FlightController {
 
     @RequestMapping(value = "/{id}/addticket", method = RequestMethod.POST)
     public ResponseEntity<TicketResponse> createTicketForFlight(@PathVariable("id") Long id, @RequestBody CreateTicketRequest createTickerRequest) {
-        Ticket ticket = ticketService.createTicket(flightService.getFlight(id).get(), createTickerRequest.getPrice(),
+        Ticket ticket = ticketService.createTicket(flightService.findFlight(id).get(), createTickerRequest.getPrice(),
                 false, false, createTickerRequest.getCommission());
         TicketResponse ticketResponse = new TicketResponse(ticket.getFlight().getDeparture(), ticket.getFlight().getDestination(),
                 ticket.getPrice(), ticket.getReserved(), ticket.getSold());

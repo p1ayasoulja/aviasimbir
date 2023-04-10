@@ -4,13 +4,14 @@ import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+
 @Entity
 public class Flight {
     @Id
     @GeneratedValue(generator = "flight_id_generator")
     @SequenceGenerator(name = "flight_id_generator", sequenceName = "flight_id_seq", allocationSize = 1)
     private Long id;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "plane")
     private Plane plane;
     @Column(name = "departure")
@@ -21,7 +22,7 @@ public class Flight {
     private ZonedDateTime departureTime;
     @Column(name = "arrival_time")
     private ZonedDateTime arrivalTime;
-    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "flight", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<Ticket> tickets;
 
     public Flight() {

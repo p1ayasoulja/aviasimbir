@@ -33,7 +33,7 @@ public class FlightService {
      * @param id идентификатор рейса
      * @return рейс
      */
-    public Optional<Flight> getFlight(Long id) {
+    public Optional<Flight> findFlight(Long id) {
         log.info("IN getFlight - Flight: {} successfully found", id);
         return flightRepository.findById(id);
     }

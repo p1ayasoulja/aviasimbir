@@ -28,7 +28,7 @@ public class AirlineService {
      * @param id идентификатор авиалинии
      * @return авиалиния
      */
-    public Optional<Airline> getAirline(Long id) {
+    public Optional<Airline> findAirline(Long id) {
         log.info("IN getAirline - Airline: {} successfully found", id);
         return airlineRepository.findById(id);
     }

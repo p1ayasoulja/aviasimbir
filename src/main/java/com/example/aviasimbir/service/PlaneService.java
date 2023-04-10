@@ -66,13 +66,11 @@ public class PlaneService {
      * @param id идентификатор самолета
      */
     public void deletePlane(Long id) {
-        Optional<Plane> plane = planeRepository.findById(id);
-        if (plane.isPresent()) {
-            plane.get().setAirline(null);
-            planeRepository.deleteById(plane.get().getId());
-            log.info("IN deletePlane - Plane: {} successfully deleted", id);
-            loggerRepository.save(new Logger("Plane " + id + " was deleted", Instant.now()));
-        }
+        planeRepository.deleteById(id);
+        log.info("IN deletePlane - Plane: {} successfully deleted", id);
+        loggerRepository.save(new Logger("Plane " + id + " was deleted", Instant.now()));
+
+
     }
 
     /**

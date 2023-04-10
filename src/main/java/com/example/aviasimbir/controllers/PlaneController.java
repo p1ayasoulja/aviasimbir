@@ -37,7 +37,7 @@ public class PlaneController {
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<PlaneResponse> createPlane(@RequestBody CreatePlaneRequest createPlaneRequest) {
         Plane plane = planeService.createPlane(createPlaneRequest.getBrand(), createPlaneRequest.getModel(),
-                createPlaneRequest.getSeats(), airlineService.getAirline(createPlaneRequest.getAirlineId()).get());
+                createPlaneRequest.getSeats(), airlineService.findAirline(createPlaneRequest.getAirlineId()).get());
         PlaneResponse planeResponse = new PlaneResponse(plane.getId(), plane.getBrand(), plane.getModel(), plane.getSeats(), plane.getAirline().getName());
         return ResponseEntity.ok(planeResponse);
     }

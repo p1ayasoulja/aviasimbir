@@ -1,0 +1,272 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="1.7" author="Andrey Galanov">
+        <sql>
+            CREATE SEQUENCE airline_id_seq;
+            CREATE SEQUENCE flight_id_seq;
+            CREATE SEQUENCE plane_id_seq;
+            CREATE SEQUENCE ticket_id_seq;
+            select setval('flight_id_seq', 5);
+            select setval('airline_id_seq', 3);
+            select setval('plane_id_seq', 5);
+            select setval('ticket_id_seq', 7);
+        </sql>
+    </changeSet>
+    <changeSet id="1.0" author="Andrey Galanov">
+        <createTable tableName="plane">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="brand" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="model" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="airline" type="bigint">
+            </column>
+            <column name="seats" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="airline">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(200)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1.1" author="Andrey Galanov">
+        <createTable tableName="flight">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="departure" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="destination" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="departure_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="arrival_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="plane" type="bigint">
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1.2" author="Andrey Galanov">
+        <addForeignKeyConstraint baseColumnNames="plane"
+                                 baseTableName="flight"
+                                 constraintName="fk_flight_plane"
+                                 onDelete="CASCADE"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="plane"/>
+        <addForeignKeyConstraint baseColumnNames="airline"
+                                 baseTableName="plane"
+                                 constraintName="fk_plane_airline"
+                                 onDelete="CASCADE"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="airline"/>
+    </changeSet>
+    <changeSet id="1.3" author="Andrey Galanov">
+        <createTable tableName="ticket">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="price" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reserved" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sold" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="flight" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="commission" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1.4" author="Andrey Galanov">
+        <addForeignKeyConstraint baseColumnNames="flight"
+                                 baseTableName="ticket"
+                                 constraintName="fk_ticket_flight"
+                                 onDelete="CASCADE"
+                                 onUpdate="RESTRICT"
+                                 referencedColumnNames="id"
+                                 referencedTableName="flight"/>
+    </changeSet>
+    <changeSet id="1.5" author="Andrey Galanov">
+        <insert tableName="airline">
+            <column name="id" valueComputed="1"/>
+            <column name="name" value="AirSerbia"/>
+        </insert>
+        <insert tableName="airline">
+            <column name="id" valueComputed="2"/>
+            <column name="name" value="FlyEmirates"/>
+        </insert>
+        <insert tableName="airline">
+            <column name="id" valueComputed="3"/>
+            <column name="name" value="FlyAstana"/>
+        </insert>
+        <insert tableName="plane">
+            <column name="id" value="1"/>
+            <column name="brand" value="AirBus"/>
+            <column name="model" value="M-179"/>
+            <column name="airline" value="1"/>
+            <column name="seats" value="65"/>
+        </insert>
+        <insert tableName="plane">
+            <column name="id" value="2"/>
+            <column name="brand" value="AirBus"/>
+            <column name="model" value="M-122"/>
+            <column name="airline" value="1"/>
+            <column name="seats" value="40"/>
+        </insert>
+        <insert tableName="plane">
+            <column name="id" value="3"/>
+            <column name="brand" value="AirBus"/>
+            <column name="model" value="K-24"/>
+            <column name="airline" value="1"/>
+            <column name="seats" value="15"/>
+        </insert>
+        <insert tableName="plane">
+            <column name="id" value="4"/>
+            <column name="brand" value="EuroPlane"/>
+            <column name="model" value="EU-44"/>
+            <column name="airline" value="2"/>
+            <column name="seats" value="150"/>
+        </insert>
+        <insert tableName="plane">
+            <column name="id" value="5"/>
+            <column name="brand" value="EuroPlane"/>
+            <column name="model" value="EU-12"/>
+            <column name="airline" value="3"/>
+            <column name="seats" value="140"/>
+        </insert>
+        <insert tableName="flight">
+            <column name="id" value="1"/>
+            <column name="departure" value="Belgrad"/>
+            <column name="destination" value="Kazan"/>
+            <column name="departure_time" value="2023-03-16 10:20:15"/>
+            <column name="arrival_time" value="2023-03-16 15:15:15"/>
+            <column name="plane" value="1"/>
+        </insert>
+        <insert tableName="flight">
+            <column name="id" value="2"/>
+            <column name="departure" value="Zagreb"/>
+            <column name="destination" value="Kazan"/>
+            <column name="departure_time" value="2023-03-14 12:12:15"/>
+            <column name="arrival_time" value="2023-03-14 17:20:15"/>
+            <column name="plane" value="2"/>
+        </insert>
+        <insert tableName="flight">
+            <column name="id" value="3"/>
+            <column name="departure" value="Zagreb"/>
+            <column name="destination" value="Belgrad"/>
+            <column name="departure_time" value="2023-04-14 22:12:15"/>
+            <column name="arrival_time" value="2023-04-15 01:20:15"/>
+            <column name="plane" value="3"/>
+        </insert>
+        <insert tableName="flight">
+            <column name="id" value="4"/>
+            <column name="departure" value="Dubai"/>
+            <column name="destination" value="Kazan"/>
+            <column name="departure_time" value="2022-05-14 23:12:15"/>
+            <column name="arrival_time" value="2022-05-15 07:20:15"/>
+            <column name="plane" value="4"/>
+        </insert>
+        <insert tableName="flight">
+            <column name="id" value="5"/>
+            <column name="departure" value="Astana"/>
+            <column name="destination" value="Kazan"/>
+            <column name="departure_time" value="2023-05-10 23:12:15"/>
+            <column name="arrival_time" value="2023-05-11 07:20:15"/>
+            <column name="plane" value="5"/>
+        </insert>
+
+        <insert tableName="ticket">
+            <column name="id" value="1"/>
+            <column name="flight" value="1"/>
+            <column name="price" value="17000"/>
+            <column name="reserved" value="false"/>
+            <column name="sold" value="false"/>
+            <column name="commission" value="false"/>
+        </insert>
+        <insert tableName="ticket">
+            <column name="id" value="2"/>
+            <column name="flight" value="1"/>
+            <column name="price" value="15000"/>
+            <column name="reserved" value="false"/>
+            <column name="sold" value="false"/>
+            <column name="commission" value="false"/>
+        </insert>
+        <insert tableName="ticket">
+            <column name="id" value="3"/>
+            <column name="flight" value="1"/>
+            <column name="price" value="122000"/>
+            <column name="reserved" value="false"/>
+            <column name="sold" value="false"/>
+            <column name="commission" value="false"/>
+        </insert>
+        <insert tableName="ticket">
+            <column name="id" value="4"/>
+            <column name="flight" value="2"/>
+            <column name="price" value="132000"/>
+            <column name="reserved" value="false"/>
+            <column name="sold" value="false"/>
+            <column name="commission" value="false"/>
+        </insert>
+        <insert tableName="ticket">
+            <column name="id" value="5"/>
+            <column name="flight" value="3"/>
+            <column name="price" value="12000"/>
+            <column name="reserved" value="false"/>
+            <column name="sold" value="false"/>
+            <column name="commission" value="false"/>
+        </insert>
+        <insert tableName="ticket">
+            <column name="id" value="6"/>
+            <column name="flight" value="4"/>
+            <column name="price" value="11000"/>
+            <column name="reserved" value="false"/>
+            <column name="sold" value="false"/>
+            <column name="commission" value="false"/>
+        </insert>
+        <insert tableName="ticket">
+            <column name="id" value="7"/>
+            <column name="flight" value="5"/>
+            <column name="price" value="12400"/>
+            <column name="reserved" value="false"/>
+            <column name="sold" value="false"/>
+            <column name="commission" value="false"/>
+        </insert>
+    </changeSet>
+    <changeSet id="1.6" author="Andrey Galanov">
+        <createTable tableName="log">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+</databaseChangeLog>

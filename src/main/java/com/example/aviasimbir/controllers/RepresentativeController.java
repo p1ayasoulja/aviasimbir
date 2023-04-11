@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/representative")
+//todo настроить проверку представителя
 public class RepresentativeController {
     private final PlaneService planeService;
     private final AirlineService airlineService;

@@ -88,6 +88,9 @@
             <column name="reserved" type="boolean">
                 <constraints nullable="false"/>
             </column>
+            <column name="reserved_until" type="TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
             <column name="sold" type="boolean">
                 <constraints nullable="false"/>
             </column>
@@ -202,6 +205,7 @@
             <column name="flight" value="1"/>
             <column name="price" value="17000"/>
             <column name="reserved" value="false"/>
+            <column name="reserved_until" value="null"/>
             <column name="sold" value="false"/>
             <column name="commission" value="false"/>
         </insert>
@@ -210,6 +214,7 @@
             <column name="flight" value="1"/>
             <column name="price" value="15000"/>
             <column name="reserved" value="false"/>
+            <column name="reserved_until" value="null"/>
             <column name="sold" value="false"/>
             <column name="commission" value="false"/>
         </insert>
@@ -218,6 +223,7 @@
             <column name="flight" value="1"/>
             <column name="price" value="122000"/>
             <column name="reserved" value="false"/>
+            <column name="reserved_until" value="null"/>
             <column name="sold" value="false"/>
             <column name="commission" value="false"/>
         </insert>
@@ -226,6 +232,7 @@
             <column name="flight" value="2"/>
             <column name="price" value="132000"/>
             <column name="reserved" value="false"/>
+            <column name="reserved_until" value="null"/>
             <column name="sold" value="false"/>
             <column name="commission" value="false"/>
         </insert>
@@ -234,6 +241,7 @@
             <column name="flight" value="3"/>
             <column name="price" value="12000"/>
             <column name="reserved" value="false"/>
+            <column name="reserved_until" value="null"/>
             <column name="sold" value="false"/>
             <column name="commission" value="false"/>
         </insert>
@@ -242,6 +250,7 @@
             <column name="flight" value="4"/>
             <column name="price" value="11000"/>
             <column name="reserved" value="false"/>
+            <column name="reserved_until" value="null"/>
             <column name="sold" value="false"/>
             <column name="commission" value="false"/>
         </insert>
@@ -250,6 +259,7 @@
             <column name="flight" value="5"/>
             <column name="price" value="12400"/>
             <column name="reserved" value="false"/>
+            <column name="reserved_until" value="null"/>
             <column name="sold" value="false"/>
             <column name="commission" value="false"/>
         </insert>

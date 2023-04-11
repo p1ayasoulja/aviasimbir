@@ -2,6 +2,7 @@ package com.example.aviasimbir.entity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 public class Ticket {
@@ -16,6 +17,8 @@ public class Ticket {
     private BigDecimal price;
     @Column(name = "reserved")
     private Boolean reserved;
+    @Column(name = "reserved_until")
+    private LocalDateTime reservedUntil;
     @Column(name = "sold")
     private Boolean sold;
     @Column(name = "commission")
@@ -78,6 +81,14 @@ public class Ticket {
 
     public void setCommission(Boolean commission) {
         this.commission = commission;
+    }
+
+    public LocalDateTime getReservedUntil() {
+        return reservedUntil;
+    }
+
+    public void setReservedUntil(LocalDateTime reservedUntil) {
+        this.reservedUntil = reservedUntil;
     }
 
     @Override

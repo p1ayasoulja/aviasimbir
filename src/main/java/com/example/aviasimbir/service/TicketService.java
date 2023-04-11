@@ -15,6 +15,7 @@ import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,15 +26,19 @@ public class TicketService {
     private final LoggerRepository loggerRepository;
     private final EntityManager entityManager;
     private final FlightRepository flightRepository;
+    private final TicketReservationService ticketReservationService;
     @Value("${ticket.fixedcommission}")
     private BigDecimal fixedcommission;
+    @Value("${ticket.reservation.timeout}")
+    private Long reservationTimeout;
 
     public TicketService(TicketRepository ticketRepository, LoggerRepository loggerRepository,
-                         EntityManager entityManager, FlightRepository flightRepository) {
+                         EntityManager entityManager, FlightRepository flightRepository, TicketReservationService ticketReservationService) {
         this.loggerRepository = loggerRepository;
         this.ticketRepository = ticketRepository;
         this.entityManager = entityManager;
         this.flightRepository = flightRepository;
+        this.ticketReservationService = ticketReservationService;
     }
 
     /**
@@ -252,9 +257,13 @@ public class TicketService {
      * @param ticket билет
      */
     public void reserveTicket(Ticket ticket) {
-        ticket.setReserved(true);
-        log.info("IN reserveTicket - Ticket successfully reserved");
-        ticketRepository.save(ticket);
+        if (!ticket.getReserved()) {
+            ticket.setReserved(true);
+            ticket.setReservedUntil(LocalDateTime.now().plusSeconds(reservationTimeout));
+            log.info("IN reserveTicket - Ticket successfully reserved");
+            ticketRepository.save(ticket);
+            ticketReservationService.scheduleTicketReservation(ticket);
+        } else log.info("IN reserveTicket - Ticket already reserved");
     }
 
     /**
@@ -263,8 +272,11 @@ public class TicketService {
      * @param ticket билет
      */
     public void cancelTicketReserve(Ticket ticket) {
-        ticket.setReserved(false);
-        ticketRepository.save(ticket);
+        if (ticket.getReserved() && ticket.getReservedUntil().isBefore(LocalDateTime.now())) {
+            ticket.setReserved(false);
+            ticket.setReservedUntil(null);
+            ticketRepository.save(ticket);
+        }
         log.info("IN cancelTicketReserve - Ticket reservation successfully cancelled");
     }
 

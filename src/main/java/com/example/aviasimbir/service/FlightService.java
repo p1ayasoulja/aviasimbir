@@ -130,6 +130,7 @@ public class FlightService {
         planes.forEach(plane -> flights.addAll(flightRepository.findAllByPlane(plane)));
         return flights;
     }
+
     /**
      * Получение списка рейсов самолета
      *

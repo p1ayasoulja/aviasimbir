@@ -141,7 +141,11 @@ public class TicketService {
                 BigDecimal.class
         );
         BigDecimal result = query.getSingleResult();
+        if (result == null) {
+            return BigDecimal.ZERO;
+        }
         BigDecimal averageCommission = result.subtract(result.divide(BigDecimal.ONE.add(fixedcommission.divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP)), 3, RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP));
+
         log.info("IN getAverageCommissionOfSoldTickets - Average Commission : {} successfully counted", averageCommission);
         return averageCommission;
     }
@@ -296,5 +300,31 @@ public class TicketService {
         query.setParameter("flight", flight);
         log.info("IN getAllTicketsByFlight - Tickets successfully found");
         return query.getResultList();
+    }
+
+    /**
+     * Подсчитать на какую сумму было продано билетов
+     *
+     * @return сумма заработка
+     */
+    public BigDecimal getTotalEarned() {
+        BigDecimal earned = BigDecimal.ZERO;
+        List<Ticket> tickets = ticketRepository.findBySold();
+        for (Ticket ticket : tickets) {
+            earned = earned.add(ticket.getPrice());
+        }
+        log.info("IN getTotalEarned - Sum of sold tickets successfully counted : {}", earned);
+        return earned;
+    }
+
+    /**
+     * Подсчитать число проданных билетов
+     *
+     * @return число билетов
+     */
+    public Long getTicketsSoldCount() {
+        List<Ticket> tickets = ticketRepository.findAll();
+        log.info("IN ticketsFromKazan - Number of sold tickets from Kazan successfully found");
+        return tickets.stream().filter(Ticket::getSold).count();
     }
 }

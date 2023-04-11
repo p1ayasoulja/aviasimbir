@@ -1,10 +1,10 @@
 package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.entity.Ticket;
+import com.example.aviasimbir.requestresponse.GetStatisticOfSoldTicketsResponse;
 import com.example.aviasimbir.service.TicketService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -33,6 +33,18 @@ public class TicketController {
     public ResponseEntity<Long> getSoldTicketsFromKazanCount() {
         return ResponseEntity.ok(ticketService.getTicketsFromKazanCount());
     }
+
+    @RequestMapping(value = "/soldstatistic", method = RequestMethod.GET)
+    @ApiOperation("Получить статистику по проданным билетам")
+    public ResponseEntity<GetStatisticOfSoldTicketsResponse> getStatisticOfSoldTickets() {
+        BigDecimal averagecommission = ticketService.getAverageCommissionOfSoldTickets();
+        Long fromKazan = ticketService.getTicketsFromKazanCount();
+        BigDecimal totalEarned = ticketService.getTotalEarned();
+        Long totalSold = ticketService.getTicketsSoldCount();
+        GetStatisticOfSoldTicketsResponse getStatisticOfSoldTicketsResponse = new GetStatisticOfSoldTicketsResponse(totalSold, fromKazan, averagecommission, totalEarned);
+        return ResponseEntity.ok(getStatisticOfSoldTicketsResponse);
+    }
+
     @RequestMapping(value = "/{id}/reserve", method = RequestMethod.PUT)
     @ApiOperation("Забронировать билет")
     public ResponseEntity<Object> reserveTicket(@PathVariable("id") Long id) {

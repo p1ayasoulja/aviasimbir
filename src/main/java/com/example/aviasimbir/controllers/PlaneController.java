@@ -21,6 +21,7 @@ public class PlaneController {
         this.planeService = planeService;
         this.airlineService = airlineService;
     }
+
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ApiOperation("Получить информацию о самолете")
     public ResponseEntity<PlaneResponse> getPlane(@PathVariable("id") Long id) {

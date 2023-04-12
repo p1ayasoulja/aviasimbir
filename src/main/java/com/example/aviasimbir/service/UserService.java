@@ -5,6 +5,7 @@ import com.example.aviasimbir.Jwt.JwtUser;
 import com.example.aviasimbir.Jwt.JwtUserFactory;
 import com.example.aviasimbir.entity.Role;
 import com.example.aviasimbir.entity.User;
+import com.example.aviasimbir.exceptions.NotRepresentativeException;
 import com.example.aviasimbir.exceptions.RegisterUserException;
 import com.example.aviasimbir.exceptions.UnavailableUsernameException;
 import com.example.aviasimbir.exceptions.UserWasNotFoundException;
@@ -24,7 +25,6 @@ import java.util.Optional;
 @Slf4j
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
@@ -58,6 +58,13 @@ public class UserService implements UserDetailsService {
         log.info("IN register - user: {} successfully registered  with role {}", registeredUser.getUsername(), registeredUser.getRole());
 
         return registeredUser;
+    }
+
+    public void isRepresentativeOfThisAirline(String username, Long id) throws NotRepresentativeException {
+        User user = userRepository.findUserByUsername(username).get();
+        if (!user.getAirline().getId().equals(id)) {
+            throw new NotRepresentativeException("You are not a representative of this airline");
+        }
     }
 
     /**

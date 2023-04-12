@@ -72,4 +72,11 @@ public class ExceptionHandlerController {
         ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ApiOperation("Обработка ошибки получения информации об авиалинии не представителем")
+    @ExceptionHandler(NotRepresentativeException.class)
+    public ResponseEntity<ExceptionResponse> handleNotRepresentativeException(NotRepresentativeException e) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.FORBIDDEN);
+    }
 }

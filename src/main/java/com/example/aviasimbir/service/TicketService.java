@@ -3,6 +3,7 @@ package com.example.aviasimbir.service;
 import com.example.aviasimbir.entity.Flight;
 import com.example.aviasimbir.entity.Logger;
 import com.example.aviasimbir.entity.Ticket;
+import com.example.aviasimbir.exceptions.*;
 import com.example.aviasimbir.repo.FlightRepository;
 import com.example.aviasimbir.repo.LoggerRepository;
 import com.example.aviasimbir.repo.TicketRepository;
@@ -17,8 +18,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -48,9 +49,11 @@ public class TicketService {
      * @param id идентификатор билета
      * @return билет
      */
-    public Optional<Ticket> findTicket(Long id) {
-        log.info("IN getTicket - Ticket: {} successfully found", id);
-        return ticketRepository.findById(id);
+    public Ticket getTicket(Long id) throws NoSuchIdException {
+        if (ticketRepository.findById(id).isPresent()) {
+            log.info("IN getTicket - Ticket: {} successfully found", id);
+            return ticketRepository.findById(id).get();
+        } else throw new NoSuchIdException("Ticket with id " + id + " was not found");
     }
 
     /**
@@ -74,7 +77,10 @@ public class TicketService {
      * @return билет
      */
     @Transactional
-    public Ticket createTicket(Flight flight, BigDecimal price, Boolean reserved, Boolean sold, Boolean commission) {
+    public Ticket createTicket(Flight flight, BigDecimal price, Boolean reserved, Boolean sold, Boolean commission) throws WrongArgumentException {
+        if (flight == null || price.compareTo(BigDecimal.ZERO) <= 0 || reserved == null || sold == null || commission == null) {
+            throw new WrongArgumentException("All fields must be filled");
+        }
         BigDecimal priceUpdated = price;
         if (commission) {
             BigDecimal hundred = BigDecimal.valueOf(100);
@@ -87,45 +93,18 @@ public class TicketService {
     }
 
     /**
-     * Обновить билет
-     *
-     * @param id       идентификатор билета
-     * @param price    цена билета
-     * @param reserved статус брони дилета
-     * @param sold     статус доступности билета
-     * @return билет
-     */
-    @Transactional
-    public Optional<Ticket> updateTicket(Long id, BigDecimal price, boolean reserved, boolean sold) {
-        Optional<Ticket> ticket = ticketRepository.findById(id);
-        if (ticket.isPresent()) {
-            if (price.compareTo(BigDecimal.ZERO) > 0) {
-                ticket.get().setPrice(price);
-            }
-            if (!sold) {
-                ticket.get().setReserved(reserved);
-            } else {
-                ticket.get().setSold(true);
-            }
-            ticketRepository.save(ticket.get());
-            log.info("IN updateTicket - Ticket: {} successfully updated", id);
-            return ticket;
-        } else {
-            log.info("IN updateTicket - Ticket: {} was not updated", id);
-            return Optional.empty();
-        }
-    }
-
-    /**
      * Удалить билет
      *
      * @param id идентификатор билета
      */
     @Transactional
-    public void deleteTicket(Long id) {
-        ticketRepository.deleteById(id);
-        loggerRepository.save(new Logger("Ticket " + id + " was deleted", Instant.now()));
-
+    public void deleteTicket(Long id) throws NoSuchIdException {
+        if (ticketRepository.findById(id).isPresent()) {
+            ticketRepository.deleteById(id);
+            loggerRepository.save(new Logger("Ticket " + id + " was deleted", Instant.now()));
+        } else {
+            throw new NoSuchIdException("Airline with id " + id + " was not found");
+        }
     }
 
     /**
@@ -151,10 +130,9 @@ public class TicketService {
         );
         BigDecimal result = query.getSingleResult();
         if (result == null) {
-            return BigDecimal.ZERO;
+            result = BigDecimal.ZERO;
         }
         BigDecimal averageCommission = result.subtract(result.divide(BigDecimal.ONE.add(fixedcommission.divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP)), 3, RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP));
-
         log.info("IN getAverageCommissionOfSoldTickets - Average Commission : {} successfully counted", averageCommission);
         return averageCommission;
     }
@@ -167,12 +145,19 @@ public class TicketService {
      * @param seats      число билетов
      * @param price      цена билетов
      */
-    public void createTicketsForCreatedFlight(Long id, Boolean commission, Integer seats, BigDecimal price) {
-        if (commission) {
-            price = price.multiply((BigDecimal.ONE.add(fixedcommission.divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP))));
-        }
-        for (int i = 0; i < seats / 2; i++) {
-            ticketRepository.save(new Ticket(flightRepository.findById(id).get(), price, false, false, commission));
+    public void createTicketsForCreatedFlight(Long id, Boolean commission, Integer seats, BigDecimal price) throws NoSuchIdException, WrongArgumentException {
+        if (flightRepository.findById(id).isPresent()) {
+            if (commission == null || price.compareTo(BigDecimal.ZERO) <= 0 || seats <= 0) {
+                throw new WrongArgumentException("All fields must be filled");
+            }
+            if (commission) {
+                price = price.multiply((BigDecimal.ONE.add(fixedcommission.divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP))));
+            }
+            for (int i = 0; i < seats / 2; i++) {
+                ticketRepository.save(new Ticket(flightRepository.findById(id).get(), price, false, false, commission));
+            }
+        } else {
+            throw new NoSuchIdException("Flight with id " + id + " was not found");
         }
     }
 
@@ -249,11 +234,19 @@ public class TicketService {
      * @param ticket билет
      */
     @Transactional
-    public void sellTicket(Ticket ticket) {
-        ticket.setSold(true);
-        ticket.setReserved(true);
-        log.info("IN sellTicket - Ticket successfully sold");
-        ticketRepository.save(ticket);
+    public void sellTicket(Ticket ticket) throws TicketSoldException, PlaneAlreadyLeftException {
+        Flight flight = flightRepository.findById(ticket.getFlight().getId()).get();
+        if (!flight.getDepartureTime().isAfter(ZonedDateTime.now())) {
+            throw new PlaneAlreadyLeftException("Plane has already left airport");
+        }
+        if (ticket.getSold()) {
+            throw new TicketSoldException("Ticket already sold");
+        } else {
+            ticket.setSold(true);
+            ticket.setReserved(true);
+            log.info("IN sellTicket - Ticket successfully sold");
+            ticketRepository.save(ticket);
+        }
     }
 
     /**
@@ -262,14 +255,20 @@ public class TicketService {
      * @param ticket билет
      */
     @Transactional
-    public void reserveTicket(Ticket ticket) {
+    public void reserveTicket(Ticket ticket) throws TicketReservedException, PlaneAlreadyLeftException {
+        Flight flight = flightRepository.findById(ticket.getFlight().getId()).get();
+        if (!flight.getDepartureTime().isAfter(ZonedDateTime.now())) {
+            throw new PlaneAlreadyLeftException("Plane has already left airport");
+        }
         if (!ticket.getReserved()) {
             ticket.setReserved(true);
             ticket.setReservedUntil(LocalDateTime.now().plusSeconds(reservationTimeout));
             log.info("IN reserveTicket - Ticket successfully reserved");
             ticketRepository.save(ticket);
             ticketReservationService.scheduleTicketReservation(ticket);
-        } else log.info("IN reserveTicket - Ticket already reserved");
+        } else {
+            throw new TicketReservedException("Ticket already reserved");
+        }
     }
 
     /**
@@ -283,8 +282,8 @@ public class TicketService {
             ticket.setReserved(false);
             ticket.setReservedUntil(null);
             ticketRepository.save(ticket);
+            log.info("IN cancelTicketReserve - Ticket reservation cancelled");
         }
-        log.info("IN cancelTicketReserve - Ticket reservation successfully cancelled");
     }
 
     /**

@@ -9,16 +9,12 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/auth")
@@ -37,22 +33,12 @@ public class AuthenticationController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation("Аутентификация пользователя")
-    public ResponseEntity<LoginUserResponse> login(@RequestBody LoginUserRequest loginUserRequest) {
-        try {
-            Optional<User> userOpt = userService.findByUsername(loginUserRequest.getUsername());
-            if (userOpt.isEmpty()) {
-                throw new UsernameNotFoundException("User with username : " + loginUserRequest.getUsername() + " not found");
-            }
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginUserRequest.getUsername(), loginUserRequest.getPassword()));
-            User user = userOpt.get();
-            String token = jwtTokenProvider.createToken(user.getUsername(), user.getRole());
-            LoginUserResponse loginUserResponse = new LoginUserResponse(token);
-            return ResponseEntity.ok(loginUserResponse);
-
-        } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username or password");
-        }
-
+    public ResponseEntity<LoginUserResponse> auth(@RequestBody LoginUserRequest loginUserRequest) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginUserRequest.getUsername(), loginUserRequest.getPassword()));
+        User user = userService.findByUsername(loginUserRequest.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        String token = jwtTokenProvider.createToken(user.getUsername(), user.getRole());
+        return ResponseEntity.ok(new LoginUserResponse(token));
     }
 }

@@ -5,6 +5,7 @@ import com.example.aviasimbir.Jwt.JwtUser;
 import com.example.aviasimbir.Jwt.JwtUserFactory;
 import com.example.aviasimbir.entity.Role;
 import com.example.aviasimbir.entity.User;
+import com.example.aviasimbir.exceptions.RegisterUserException;
 import com.example.aviasimbir.repo.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -37,7 +38,10 @@ public class UserService implements UserDetailsService {
      * @return новый пользователь
      */
     @Transactional
-    public User register(String username, String password) {
+    public User register(String username, String password) throws RegisterUserException {
+        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            throw new RegisterUserException("Username and password cannot be null or empty");
+        }
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
@@ -62,12 +66,11 @@ public class UserService implements UserDetailsService {
             log.info("IN findByUsername - user : {} was not found", username);
             return userOpt;
         }
-        log.info("IN findByUsername - user : {} found with role {}", username, userOpt.get().getRole());
         return userOpt;
     }
 
     /**
-     * Создание JWT-пользователя
+     * Загрузка пользователя
      *
      * @param username имя пользователя
      * @return JWT-пользователь
@@ -79,7 +82,7 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("Cant find user with username :" + username);
         }
         JwtUser jwtUser = JwtUserFactory.create(userOpt.get());
-        log.info("IN loadByUsername - user with: {} loaded", username);
+        log.info("IN loadByUsername - user with: {} loaded with Role {}", username, userOpt.get().getRole());
         return jwtUser;
     }
 }

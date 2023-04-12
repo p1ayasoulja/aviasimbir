@@ -1,6 +1,9 @@
 package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.entity.Ticket;
+import com.example.aviasimbir.exceptions.NoSuchIdException;
+import com.example.aviasimbir.exceptions.PlaneAlreadyLeftException;
+import com.example.aviasimbir.exceptions.TicketReservedException;
 import com.example.aviasimbir.requestresponse.GetStatisticOfSoldTicketsResponse;
 import com.example.aviasimbir.service.TicketService;
 import io.swagger.annotations.ApiOperation;
@@ -11,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/ticket")
@@ -45,13 +47,11 @@ public class TicketController {
         return ResponseEntity.ok(getStatisticOfSoldTicketsResponse);
     }
 
-    @RequestMapping(value = "/{id}/reserve", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}/reserve", method = RequestMethod.PATCH)
     @ApiOperation("Забронировать билет")
-    public ResponseEntity<Object> reserveTicket(@PathVariable("id") Long id) {
-        Optional<Ticket> ticket = ticketService.findTicket(id);
-        if (ticket.isPresent()) {
-            ticketService.reserveTicket(ticket.get());
-            return ResponseEntity.ok().build();
-        } else return ResponseEntity.notFound().build();
+    public ResponseEntity<Object> reserveTicket(@PathVariable("id") Long id) throws NoSuchIdException, TicketReservedException, PlaneAlreadyLeftException {
+        Ticket ticket = ticketService.getTicket(id);
+        ticketService.reserveTicket(ticket);
+        return ResponseEntity.ok().build();
     }
 }

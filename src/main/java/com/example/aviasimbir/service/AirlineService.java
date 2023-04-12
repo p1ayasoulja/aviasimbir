@@ -6,6 +6,7 @@ import com.example.aviasimbir.repo.AirlineRepository;
 import com.example.aviasimbir.repo.LoggerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -49,6 +50,7 @@ public class AirlineService {
      * @param name имя авиалинии
      * @return авиалиния
      */
+    @Transactional
     public Airline createAirline(String name) {
         Airline airline = new Airline(name);
         airlineRepository.save(airline);
@@ -63,6 +65,7 @@ public class AirlineService {
      * @param name имя авиалинии
      * @return авиалиния
      */
+    @Transactional
     public Optional<Airline> updateAirline(Long id, String name) {
         Optional<Airline> airline = airlineRepository.findById(id);
         if (airline.isPresent()) {
@@ -83,6 +86,7 @@ public class AirlineService {
      *
      * @param id - идентификатор авиалинии
      */
+    @Transactional
     public void deleteAirline(Long id) {
         Optional<Airline> airline = airlineRepository.findById(id);
         if (airline.isPresent()) {

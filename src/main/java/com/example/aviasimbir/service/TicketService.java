@@ -9,6 +9,7 @@ import com.example.aviasimbir.repo.TicketRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -72,6 +73,7 @@ public class TicketService {
      * @param commission статус наличия коммиссии
      * @return билет
      */
+    @Transactional
     public Ticket createTicket(Flight flight, BigDecimal price, Boolean reserved, Boolean sold, Boolean commission) {
         BigDecimal priceUpdated = price;
         if (commission) {
@@ -93,6 +95,7 @@ public class TicketService {
      * @param sold     статус доступности билета
      * @return билет
      */
+    @Transactional
     public Optional<Ticket> updateTicket(Long id, BigDecimal price, boolean reserved, boolean sold) {
         Optional<Ticket> ticket = ticketRepository.findById(id);
         if (ticket.isPresent()) {
@@ -118,6 +121,7 @@ public class TicketService {
      *
      * @param id идентификатор билета
      */
+    @Transactional
     public void deleteTicket(Long id) {
         ticketRepository.deleteById(id);
         loggerRepository.save(new Logger("Ticket " + id + " was deleted", Instant.now()));
@@ -225,7 +229,7 @@ public class TicketService {
     }
 
     /**
-     * Получить на какую сумму было продано билетов
+     * Получить на какую сумму было продано билетов на рейсах
      *
      * @param flights рейсы
      * @return сумма заработка
@@ -244,6 +248,7 @@ public class TicketService {
      *
      * @param ticket билет
      */
+    @Transactional
     public void sellTicket(Ticket ticket) {
         ticket.setSold(true);
         ticket.setReserved(true);
@@ -256,6 +261,7 @@ public class TicketService {
      *
      * @param ticket билет
      */
+    @Transactional
     public void reserveTicket(Ticket ticket) {
         if (!ticket.getReserved()) {
             ticket.setReserved(true);
@@ -271,6 +277,7 @@ public class TicketService {
      *
      * @param ticket билет
      */
+    @Transactional
     public void cancelTicketReserve(Ticket ticket) {
         if (ticket.getReserved() && ticket.getReservedUntil().isBefore(LocalDateTime.now())) {
             ticket.setReserved(false);

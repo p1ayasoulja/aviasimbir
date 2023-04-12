@@ -7,6 +7,7 @@ import com.example.aviasimbir.repo.LoggerRepository;
 import com.example.aviasimbir.repo.PlaneRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -53,6 +54,7 @@ public class PlaneService {
      * @param airline авиалиния
      * @return самолет
      */
+    @Transactional
     public Plane createPlane(String brand, String model, int seats, Airline airline) {
         Plane plane = new Plane(brand, model, seats, airline);
         planeRepository.save(plane);
@@ -65,6 +67,7 @@ public class PlaneService {
      *
      * @param id идентификатор самолета
      */
+    @Transactional
     public void deletePlane(Long id) {
         planeRepository.deleteById(id);
         log.info("IN deletePlane - Plane: {} successfully deleted", id);

@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -35,6 +36,7 @@ public class UserService implements UserDetailsService {
      * @param password пароль пользователя
      * @return новый пользователь
      */
+    @Transactional
     public User register(String username, String password) {
         User user = new User();
         user.setUsername(username);

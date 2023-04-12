@@ -36,7 +36,7 @@ public class AuthenticationController {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    @ApiOperation("Авторизация пользователя")
+    @ApiOperation("Аутентификация пользователя")
     public ResponseEntity<LoginUserResponse> login(@RequestBody LoginUserRequest loginUserRequest) {
         try {
             Optional<User> userOpt = userService.findByUsername(loginUserRequest.getUsername());

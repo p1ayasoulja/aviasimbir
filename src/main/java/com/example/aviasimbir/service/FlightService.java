@@ -7,6 +7,7 @@ import com.example.aviasimbir.repo.FlightRepository;
 import com.example.aviasimbir.repo.LoggerRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
@@ -56,6 +57,7 @@ public class FlightService {
      * @param arrivalTime   время прибытия
      * @return рейс
      */
+    @Transactional
     public Flight createFlight(Plane plane, String departure, String destination,
                                ZonedDateTime departureTime, ZonedDateTime arrivalTime) {
         Flight flight = new Flight(plane, departure, destination, departureTime, arrivalTime);
@@ -75,6 +77,7 @@ public class FlightService {
      * @param destination   точка прибытия
      * @return рейс
      */
+    @Transactional
     public Optional<Flight> updateFlight(Long id, ZonedDateTime departureTime,
                                          ZonedDateTime arrivalTime, Plane plane,
                                          String departure, String destination) {
@@ -111,7 +114,7 @@ public class FlightService {
      *
      * @param id идентификатор рейса
      */
-
+    @Transactional
     public void deleteFlight(Long id) {
         flightRepository.deleteById(id);
         log.info("IN deleteFlight - Flight: {} successfully deleted", id);

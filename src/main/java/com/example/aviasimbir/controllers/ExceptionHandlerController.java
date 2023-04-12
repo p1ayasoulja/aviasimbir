@@ -14,7 +14,7 @@ public class ExceptionHandlerController {
     @ExceptionHandler(NoSuchIdException.class)
     public ResponseEntity<ExceptionResponse> handleNoSuchIdException(NoSuchIdException e) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
     }
 
     @ApiOperation("Обработка ошибки неверных данных при создании/обновлении")
@@ -59,10 +59,17 @@ public class ExceptionHandlerController {
         return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ApiOperation("Обработка ошибки неверного никнейма")
+    @ApiOperation("Обработка ошибки ввода неверного никнейма при аутентификации")
     @ExceptionHandler(UserWasNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleUserWasNotFoundException(UserWasNotFoundException e) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ApiOperation("Обработка ошибки регистрации с уже использованным никнеймом")
+    @ExceptionHandler(UnavailableUsernameException.class)
+    public ResponseEntity<ExceptionResponse> handleUnavailableUsernameException(UnavailableUsernameException e) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 }

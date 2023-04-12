@@ -289,7 +289,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="username" type="varchar(200)">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="password" type="varchar(200)">
                 <constraints nullable="false"/>

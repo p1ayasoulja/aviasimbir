@@ -6,6 +6,7 @@ import com.example.aviasimbir.Jwt.JwtUserFactory;
 import com.example.aviasimbir.entity.Role;
 import com.example.aviasimbir.entity.User;
 import com.example.aviasimbir.exceptions.RegisterUserException;
+import com.example.aviasimbir.exceptions.UnavailableUsernameException;
 import com.example.aviasimbir.exceptions.UserWasNotFoundException;
 import com.example.aviasimbir.repo.UserRepository;
 import lombok.SneakyThrows;
@@ -40,9 +41,12 @@ public class UserService implements UserDetailsService {
      * @return новый пользователь
      */
     @Transactional
-    public User register(String username, String password) throws RegisterUserException {
+    public User register(String username, String password) throws RegisterUserException, UnavailableUsernameException {
         if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
             throw new RegisterUserException("Username and password cannot be null or empty");
+        }
+        if (userRepository.existsUserByUsername(username)) {
+            throw new UnavailableUsernameException("User with this username already exists");
         }
         User user = new User();
         user.setUsername(username);

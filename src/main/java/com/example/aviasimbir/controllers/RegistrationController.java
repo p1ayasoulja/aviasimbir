@@ -2,6 +2,7 @@ package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.entity.User;
 import com.example.aviasimbir.exceptions.RegisterUserException;
+import com.example.aviasimbir.exceptions.UnavailableUsernameException;
 import com.example.aviasimbir.requestresponse.RegisterUserRequest;
 import com.example.aviasimbir.requestresponse.RegisterUserResponse;
 import com.example.aviasimbir.service.UserService;
@@ -23,7 +24,7 @@ public class RegistrationController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation("Регистрация пользователя")
-    public ResponseEntity<RegisterUserResponse> registerUser(@RequestBody RegisterUserRequest registerUserRequest) throws RegisterUserException {
+    public ResponseEntity<RegisterUserResponse> registerUser(@RequestBody RegisterUserRequest registerUserRequest) throws RegisterUserException, UnavailableUsernameException {
         User newUser = userService.register(registerUserRequest.getUsername(), registerUserRequest.getPassword());
         RegisterUserResponse registerUserResponse = new RegisterUserResponse(newUser.getId());
         return ResponseEntity.ok(registerUserResponse);

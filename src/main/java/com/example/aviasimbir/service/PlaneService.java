@@ -110,8 +110,7 @@ public class PlaneService {
         if (airlineRepository.findById(id).isPresent()) {
             log.info("IN getPlanesCount - Planes successfully counted : {}", planeRepository.countByAirlineId(id));
             return planeRepository.countByAirlineId(id);
-        }
-        else {
+        } else {
             throw new NoSuchIdException("Airline with id " + id + " was not found");
         }
     }

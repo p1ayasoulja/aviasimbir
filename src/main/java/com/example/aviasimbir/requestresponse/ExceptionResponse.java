@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class ExceptionResponse {
     @ApiModelProperty("Сообщение ошибки")
     private String message;
+
     public ExceptionResponse(@JsonProperty("Exception message") String message) {
         this.message = message;
     }

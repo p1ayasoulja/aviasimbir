@@ -6,7 +6,9 @@ import com.example.aviasimbir.Jwt.JwtUserFactory;
 import com.example.aviasimbir.entity.Role;
 import com.example.aviasimbir.entity.User;
 import com.example.aviasimbir.exceptions.RegisterUserException;
+import com.example.aviasimbir.exceptions.UserWasNotFoundException;
 import com.example.aviasimbir.repo.UserRepository;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -60,11 +62,10 @@ public class UserService implements UserDetailsService {
      * @param username имя пользователя
      * @return пользователь
      */
-    public Optional<User> findByUsername(String username) {
+    public Optional<User> findByUsername(String username) throws UserWasNotFoundException {
         Optional<User> userOpt = userRepository.findUserByUsername(username);
         if (userOpt.isEmpty()) {
-            log.info("IN findByUsername - user : {} was not found", username);
-            return userOpt;
+            throw new UserWasNotFoundException("User was not found");
         }
         return userOpt;
     }
@@ -75,6 +76,7 @@ public class UserService implements UserDetailsService {
      * @param username имя пользователя
      * @return JWT-пользователь
      */
+    @SneakyThrows
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOpt = findByUsername(username);

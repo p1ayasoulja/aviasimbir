@@ -1,32 +1,27 @@
 package com.example.aviasimbir.service;
 
 import com.example.aviasimbir.entity.Flight;
-import com.example.aviasimbir.entity.Logger;
 import com.example.aviasimbir.entity.Ticket;
 import com.example.aviasimbir.exceptions.*;
 import com.example.aviasimbir.repo.FlightRepository;
-import com.example.aviasimbir.repo.LoggerRepository;
 import com.example.aviasimbir.repo.TicketRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @Slf4j
 public class TicketService {
     private final TicketRepository ticketRepository;
-    private final LoggerRepository loggerRepository;
-    private final EntityManager entityManager;
     private final FlightRepository flightRepository;
     private final TicketReservationService ticketReservationService;
     @Value("${ticket.fixedcommission}")
@@ -34,11 +29,8 @@ public class TicketService {
     @Value("${ticket.reservation.timeout}")
     private Long reservationTimeout;
 
-    public TicketService(TicketRepository ticketRepository, LoggerRepository loggerRepository,
-                         EntityManager entityManager, FlightRepository flightRepository, TicketReservationService ticketReservationService) {
-        this.loggerRepository = loggerRepository;
+    public TicketService(TicketRepository ticketRepository, FlightRepository flightRepository, TicketReservationService ticketReservationService) {
         this.ticketRepository = ticketRepository;
-        this.entityManager = entityManager;
         this.flightRepository = flightRepository;
         this.ticketReservationService = ticketReservationService;
     }
@@ -54,16 +46,6 @@ public class TicketService {
             log.info("IN getTicket - Ticket: {} successfully found", id);
             return ticketRepository.findById(id).get();
         } else throw new NoSuchIdException("Ticket with id " + id + " was not found");
-    }
-
-    /**
-     * Получить список билетов
-     *
-     * @return список билетов
-     */
-    public List<Ticket> getAllTickets() {
-        log.info("IN getAllTickets - List of : {} successfully found", "tickets");
-        return ticketRepository.findAll();
     }
 
     /**
@@ -93,29 +75,14 @@ public class TicketService {
     }
 
     /**
-     * Удалить билет
-     *
-     * @param id идентификатор билета
-     */
-    @Transactional
-    public void deleteTicket(Long id) throws NoSuchIdException {
-        if (ticketRepository.findById(id).isPresent()) {
-            ticketRepository.deleteById(id);
-            loggerRepository.save(new Logger("Ticket " + id + " was deleted", Instant.now()));
-        } else {
-            throw new NoSuchIdException("Airline with id " + id + " was not found");
-        }
-    }
-
-    /**
      * Подсчитать число билетов с отправлением из Казани
      *
      * @return число билетов
      */
-    public Long getTicketsFromKazanCount() {
-        List<Ticket> tickets = ticketRepository.findAll();
+    public Long getSoldTicketsFromKazanCount() {
+        long number = ticketRepository.getTicketsByFlightDepartureAndSold("Kazan");
         log.info("IN ticketsFromKazan - Number of sold tickets from Kazan successfully found");
-        return tickets.stream().filter(ticket -> ticket.getFlight().getDeparture().equals("Kazan") && ticket.getSold()).count();
+        return number;
     }
 
     /**
@@ -124,18 +91,20 @@ public class TicketService {
      * @return средняя коммиссия по проданным билетам
      */
     public BigDecimal getAverageCommissionOfSoldTickets() {
-        TypedQuery<BigDecimal> query = entityManager.createQuery(
-                "SELECT (SUM(t.price)) / COUNT(t) FROM Ticket t WHERE t.sold = true AND t.commission = true",
-                BigDecimal.class
-        );
-        BigDecimal result = query.getSingleResult();
-        if (result == null) {
-            result = BigDecimal.ZERO;
+        BigDecimal averageTicketPrice = ticketRepository.getAverageTicketPrice();
+        BigDecimal averageCommission;
+        if (averageTicketPrice.equals(BigDecimal.ZERO)) {
+            averageCommission = BigDecimal.ZERO;
+        } else {
+            BigDecimal commissionPercentage = fixedcommission.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            BigDecimal divisor = BigDecimal.ONE.add(commissionPercentage);
+            BigDecimal dividend = averageTicketPrice.divide(divisor, 3, RoundingMode.HALF_UP);
+            averageCommission = averageTicketPrice.subtract(dividend).setScale(2, RoundingMode.HALF_UP);
         }
-        BigDecimal averageCommission = result.subtract(result.divide(BigDecimal.ONE.add(fixedcommission.divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP)), 3, RoundingMode.HALF_UP).setScale(2, RoundingMode.HALF_UP));
         log.info("IN getAverageCommissionOfSoldTickets - Average Commission : {} successfully counted", averageCommission);
         return averageCommission;
     }
+
 
     /**
      * Создать билеты для только что созданного рейса
@@ -146,86 +115,20 @@ public class TicketService {
      * @param price      цена билетов
      */
     public void createTicketsForCreatedFlight(Long id, Boolean commission, Integer seats, BigDecimal price) throws NoSuchIdException, WrongArgumentException {
-        if (flightRepository.findById(id).isPresent()) {
-            if (commission == null || price.compareTo(BigDecimal.ZERO) <= 0 || seats <= 0) {
-                throw new WrongArgumentException("All fields must be filled");
-            }
-            if (commission) {
-                price = price.multiply((BigDecimal.ONE.add(fixedcommission.divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP))));
-            }
-            for (int i = 0; i < seats / 2; i++) {
-                ticketRepository.save(new Ticket(flightRepository.findById(id).get(), price, false, false, commission));
-            }
-        } else {
-            throw new NoSuchIdException("Flight with id " + id + " was not found");
+        Flight flight = flightRepository.findById(id)
+                .orElseThrow(() -> new NoSuchIdException("Flight with id " + id + " was not found"));
+        if (commission == null || price.compareTo(BigDecimal.ZERO) <= 0 || seats <= 0) {
+            throw new WrongArgumentException("All fields must be filled");
         }
-    }
-
-    /**
-     * Подсчитать сколько продано билетов на данном рейсе
-     *
-     * @param flight рейс билета
-     * @return число проданных билетов по рейсу
-     */
-    public Long getSoldTicketCountByFlight(Flight flight) {
-        TypedQuery<Long> query = entityManager.createQuery(
-                "SELECT COUNT(t) FROM Ticket t WHERE t.flight = :flight AND t.sold = true",
-                Long.class
-        );
-        query.setParameter("flight", flight);
-        Long count = query.getSingleResult();
-        log.info("IN getSoldTicketCountByFlight - Tickets: {} successfully sold on {}", count, flight);
-        return count;
-    }
-
-    /**
-     * Число проданных билетов на данных рейсах
-     *
-     * @param flights рейсы
-     * @return число проднных билетов рейсов
-     */
-    public Long getAllSoldTicketsCountByFlights(List<Flight> flights) {
-        Long sum = 0L;
-        for (Flight flight : flights) {
-            sum += getSoldTicketCountByFlight(flight);
+        if (commission) {
+            price = price.multiply((BigDecimal.ONE.add
+                    (fixedcommission.divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP))));
         }
-        log.info("IN getAllSoldTicketsCountByFlights - Sold tickets : {} successfully counted", sum);
-        return sum;
-    }
-
-    /**
-     * Подсчитать на какую сумму продано билетов на данном рейсе
-     *
-     * @param flight рейс билета
-     * @return сумма
-     */
-    public BigDecimal getSoldTicketSumByFlight(Flight flight) {
-        TypedQuery<BigDecimal> query = entityManager.createQuery(
-                "SELECT SUM(t.price) FROM Ticket t WHERE t.flight = :flight AND t.sold = true",
-                BigDecimal.class
-        );
-        query.setParameter("flight", flight);
-        BigDecimal sum = query.getSingleResult();
-        if (sum == null) {
-            sum = BigDecimal.ZERO;
-        }
-        log.info("IN getSoldTicketSumByFlight - Sum of sold tickets : {} in {}", sum, flight);
-        return sum;
-    }
-
-    /**
-     * Получить на какую сумму было продано билетов на рейсах
-     *
-     * @param flights рейсы
-     * @return сумма заработка
-     */
-    public BigDecimal getTotalEarnedByFlights(List<Flight> flights) {
-        BigDecimal earned = BigDecimal.ZERO;
-        for (Flight flight : flights) {
-            earned = earned.add(getSoldTicketSumByFlight(flight));
-        }
-        log.info("IN getTotalEarnedByFlights - Sum of sold tickets successfully counted : {}", earned);
-        return earned;
+        BigDecimal finalPrice = price;
+        List<Ticket> tickets = IntStream.range(0, seats / 2)
+                .mapToObj(i -> new Ticket(flight, finalPrice, false, false, commission))
+                .collect(Collectors.toList());
+        ticketRepository.saveAll(tickets);
     }
 
     /**
@@ -234,8 +137,9 @@ public class TicketService {
      * @param ticket билет
      */
     @Transactional
-    public void sellTicket(Ticket ticket) throws TicketSoldException, PlaneAlreadyLeftException {
-        Flight flight = flightRepository.findById(ticket.getFlight().getId()).get();
+    public void sellTicket(Ticket ticket) throws TicketSoldException, PlaneAlreadyLeftException, NoSuchIdException {
+        Flight flight = flightRepository.findById(ticket.getFlight().getId())
+                .orElseThrow(() -> new NoSuchIdException("Flight was not found"));
         if (!flight.getDepartureTime().isAfter(ZonedDateTime.now())) {
             throw new PlaneAlreadyLeftException("Plane has already left airport");
         }
@@ -248,15 +152,15 @@ public class TicketService {
             ticketRepository.save(ticket);
         }
     }
-
     /**
      * Забронировать билет
      *
      * @param ticket билет
      */
     @Transactional
-    public void reserveTicket(Ticket ticket) throws TicketReservedException, PlaneAlreadyLeftException {
-        Flight flight = flightRepository.findById(ticket.getFlight().getId()).get();
+    public void reserveTicket(Ticket ticket) throws TicketReservedException, PlaneAlreadyLeftException, NoSuchIdException {
+        Flight flight = flightRepository.findById(ticket.getFlight().getId())
+                .orElseThrow(() -> new NoSuchIdException("Flight was not found"));
         if (!flight.getDepartureTime().isAfter(ZonedDateTime.now())) {
             throw new PlaneAlreadyLeftException("Plane has already left airport");
         }
@@ -292,32 +196,9 @@ public class TicketService {
      * @return список доступных билетов рейса
      */
     public List<Ticket> getAllAvailableTicketsByFlight(Flight flight) {
-        TypedQuery<Ticket> query = entityManager.createQuery(
-                "SELECT t FROM Ticket t WHERE t.flight = :flight AND t.reserved=false", Ticket.class);
-        query.setParameter("flight", flight);
+        List<Ticket> tickets = ticketRepository.getTicketByFlightAndNotReserved(flight);
         log.info("IN getAllAvailableTicketsByFlight - Tickets successfully found");
-        return query.getResultList();
-    }
-
-    /**
-     * Возвращает список всех билетов, связанных с определенным рейсом.
-     *
-     * @param flight Рейс, для которого нужно получить билеты
-     * @param sold   true, если нужно получить список проданных билетов, false - для списка доступных для продажи
-     * @return Список билетов
-     */
-    public List<Ticket> getAllTicketsByFlight(Flight flight, Boolean sold) {
-        TypedQuery<Ticket> query;
-        if (sold) {
-            query = entityManager.createQuery(
-                    "SELECT t FROM Ticket t WHERE t.flight = :flight", Ticket.class);
-        } else {
-            query = entityManager.createQuery(
-                    "SELECT t FROM Ticket t WHERE t.flight = :flight AND t.sold=false", Ticket.class);
-        }
-        query.setParameter("flight", flight);
-        log.info("IN getAllTicketsByFlight - Tickets successfully found");
-        return query.getResultList();
+        return tickets;
     }
 
     /**
@@ -344,5 +225,16 @@ public class TicketService {
         List<Ticket> tickets = ticketRepository.findAll();
         log.info("IN ticketsFromKazan - Number of sold tickets from Kazan successfully found");
         return tickets.stream().filter(Ticket::getSold).count();
+    }
+
+    /**
+     * Подсчитать число проданных билетов
+     *
+     * @return число билетов
+     */
+    public List<Ticket> findTicketsByAirline(Long id, Boolean sold) {
+        List<Ticket> tickets = ticketRepository.getAllTicketsByAirlineAndSold(id, sold);
+        log.info("IN ticketsFromKazan - Number of sold tickets from Kazan successfully found");
+        return tickets;
     }
 }

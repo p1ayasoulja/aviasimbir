@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -41,16 +40,6 @@ public class PlaneService {
         } else {
             throw new NoSuchIdException("Plane with id " + id + " was not found");
         }
-    }
-
-    /**
-     * Получить список самолетов
-     *
-     * @return список самолетов
-     */
-    public List<Plane> getAllPlanes() {
-        log.info("IN getAllPlanes - List of: {} successfully found", "planes");
-        return planeRepository.findAll();
     }
 
     /**
@@ -87,17 +76,6 @@ public class PlaneService {
         } else {
             throw new NoSuchIdException("Plane with id " + id + " was not found");
         }
-    }
-
-    /**
-     * Получить список самолетов авиалинии
-     *
-     * @param airline авиалиния
-     * @return список самолетов авиалинии
-     */
-    public List<Plane> getListOfPlanes(Airline airline) {
-        log.info("IN getListOfPlanes - Planes of: {} successfully found", airline.getName());
-        return planeRepository.findAllByAirline(airline);
     }
 
     /**

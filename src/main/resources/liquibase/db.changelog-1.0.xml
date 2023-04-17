@@ -8,6 +8,7 @@
             CREATE SEQUENCE flight_id_seq;
             CREATE SEQUENCE plane_id_seq;
             CREATE SEQUENCE ticket_id_seq;
+            CREATE SEQUENCE log_id_seq;
             select setval('flight_id_seq', 5);
             select setval('airline_id_seq', 3);
             select setval('plane_id_seq', 5);
@@ -161,7 +162,7 @@
         </insert>
         <insert tableName="flight">
             <column name="id" value="1"/>
-            <column name="departure" value="Belgrad"/>
+            <column name="departure" value="Belgrade"/>
             <column name="destination" value="Kazan"/>
             <column name="departure_time" value="2023-03-16 10:20:15"/>
             <column name="arrival_time" value="2023-03-16 15:15:15"/>
@@ -178,7 +179,7 @@
         <insert tableName="flight">
             <column name="id" value="3"/>
             <column name="departure" value="Zagreb"/>
-            <column name="destination" value="Belgrad"/>
+            <column name="destination" value="Belgrade"/>
             <column name="departure_time" value="2023-04-14 22:12:15"/>
             <column name="arrival_time" value="2023-04-15 01:20:15"/>
             <column name="plane" value="3"/>
@@ -266,7 +267,7 @@
     </changeSet>
     <changeSet id="1.7" author="Andrey Galanov">
         <createTable tableName="log">
-            <column name="id" type="BIGINT" autoIncrement="true">
+            <column name="id" type="BIGINT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="time" type="timestamp">

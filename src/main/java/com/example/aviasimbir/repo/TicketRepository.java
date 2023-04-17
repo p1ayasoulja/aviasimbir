@@ -6,12 +6,23 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    List<Ticket> findByFlight(Flight flight);
-
     @Query("select t from Ticket t where t.sold = true")
     List<Ticket> findBySold();
+
+    @Query("select (sum (t.price)) / count (t) from Ticket t where t.sold = true and t.commission = true")
+    BigDecimal getAverageTicketPrice();
+
+    @Query("select t from Ticket t where t.flight = ?1 and t.reserved = false ")
+    List<Ticket> getTicketByFlightAndNotReserved(Flight flight);
+
+    @Query("select count (t) from Ticket t where t.flight.departure = ?1 and t.sold =  true")
+    Long getTicketsByFlightDepartureAndSold(String destination);
+
+    @Query("SELECT t FROM Ticket t JOIN t.flight f JOIN f.plane p JOIN p.airline a WHERE a.id = ?1 AND t.sold = ?2")
+    List<Ticket> getAllTicketsByAirlineAndSold(Long airlineId, Boolean sold);
 }

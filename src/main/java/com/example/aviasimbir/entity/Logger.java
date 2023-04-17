@@ -7,7 +7,8 @@ import java.time.Instant;
 @Table(name = "log")
 public class Logger {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(generator = "log_id_generator")
+    @SequenceGenerator(name = "log_id_generator", sequenceName = "log_id_seq", allocationSize = 1)
     private Long id;
     @Column(name = "title")
     private String title;
@@ -36,5 +37,13 @@ public class Logger {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Instant getInstant() {
+        return instant;
+    }
+
+    public void setInstant(Instant instant) {
+        this.instant = instant;
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -60,10 +61,13 @@ public class UserService implements UserDetailsService {
         return registeredUser;
     }
 
-    public void isRepresentativeOfThisAirline(String username, Long id) throws NotRepresentativeException {
-        User user = userRepository.findUserByUsername(username).get();
-        if (!user.getAirline().getId().equals(id)) {
-            throw new NotRepresentativeException("You are not a representative of this airline");
+    public Boolean isRepresentativeOfThisAirline(String username, Long id) throws NotRepresentativeException {
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        if (Objects.equals(user.getAirline().getId(), id)) {
+            return true;
+        } else {
+            throw new NotRepresentativeException("User is not representative");
         }
     }
 

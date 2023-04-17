@@ -10,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,16 +42,6 @@ public class AirlineService {
     }
 
     /**
-     * Получение всех сущностей авиалиний
-     *
-     * @return список авиалиний
-     */
-    public List<Airline> getAllAirlines() {
-        log.info("IN getAll - List of : {} successfully found", "airlines");
-        return airlineRepository.findAll();
-    }
-
-    /**
      * Создать авиалинию
      *
      * @param name имя авиалинии
@@ -77,19 +67,15 @@ public class AirlineService {
      */
     @Transactional
     public Airline updateAirline(Long id, String name) throws NoSuchIdException, WrongArgumentException {
-        Optional<Airline> airline = airlineRepository.findById(id);
-        if (airline.isPresent()) {
-            if (name == null || name.trim().isEmpty()) {
-                throw new WrongArgumentException("Airline name cannot be null or empty");
-            } else {
-                airline.get().setName(name);
-                airlineRepository.save(airline.get());
-                log.info("IN update - Airline: {} successfully updated", name);
-                return airline.get();
-            }
-        } else {
-            throw new NoSuchIdException("Airline with id " + id + " was not found");
+        Airline airline = airlineRepository.findById(id)
+                .orElseThrow(() -> new NoSuchIdException("Airline with id " + id + " was not found"));
+        if (name == null || name.trim().isEmpty()) {
+            throw new WrongArgumentException("Airline name cannot be null or empty");
         }
+        airline.setName(name);
+        airlineRepository.save(airline);
+        log.info("IN update - Airline: {} successfully updated", name);
+        return airline;
     }
 
     /**
@@ -99,11 +85,26 @@ public class AirlineService {
      */
     @Transactional
     public void deleteAirline(Long id) throws NoSuchIdException {
-        Optional<Airline> airline = airlineRepository.findById(id);
-        if (airline.isPresent()) {
-            airlineRepository.deleteById(airline.get().getId());
-            log.info("IN delete - Airline: {} successfully deleted", id);
-            loggerRepository.save(new Logger("Airline " + id + " was deleted", Instant.now()));
-        } else throw new NoSuchIdException("Airline with id " + id + " was not found");
+        Airline airline = airlineRepository.findById(id)
+                .orElseThrow(() -> new NoSuchIdException("Airline with id " + id + " was not found"));
+        airlineRepository.delete(airline);
+        log.info("IN delete - Airline: {} successfully deleted", id);
+        loggerRepository.save(new Logger("Airline " + id + " was deleted", Instant.now()));
+    }
+
+    /**
+     * @param id идентификатор авиалинии
+     * @return число проданных билетов авиалинии
+     */
+    public Long getTotalSoldTickets(Long id) {
+        return airlineRepository.getTotalSoldTicketsByAirline(id);
+    }
+
+    /**
+     * @param id идентификатор авиалинии
+     * @return число проданных билетов авиалинии
+     */
+    public BigDecimal getTotalEarnedByAirline(Long id) {
+        return airlineRepository.getTotalEarnedByAirline(id);
     }
 }

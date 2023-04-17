@@ -4,6 +4,8 @@ import com.example.aviasimbir.entity.Ticket;
 import com.example.aviasimbir.exceptions.NoSuchIdException;
 import com.example.aviasimbir.exceptions.PlaneAlreadyLeftException;
 import com.example.aviasimbir.exceptions.TicketReservedException;
+import com.example.aviasimbir.requestresponse.GetAverageCommissionResponse;
+import com.example.aviasimbir.requestresponse.GetSoldTicketsFromKazanCountResponse;
 import com.example.aviasimbir.requestresponse.GetStatisticOfSoldTicketsResponse;
 import com.example.aviasimbir.service.TicketService;
 import io.swagger.annotations.ApiOperation;
@@ -26,21 +28,25 @@ public class TicketController {
 
     @RequestMapping(value = "/averagecommission", method = RequestMethod.GET)
     @ApiOperation("Получить среднюю коммиссию по проданным билетам")
-    public ResponseEntity<BigDecimal> getAverageCommission() {
-        return ResponseEntity.ok(ticketService.getAverageCommissionOfSoldTickets());
+    public ResponseEntity<GetAverageCommissionResponse> getAverageCommission() {
+        GetAverageCommissionResponse getAverageCommissionResponse =
+                new GetAverageCommissionResponse(ticketService.getAverageCommissionOfSoldTickets());
+        return ResponseEntity.ok(getAverageCommissionResponse);
     }
 
     @RequestMapping(value = "/kazan", method = RequestMethod.GET)
     @ApiOperation("Получить число проданных билетов с точкой отправления Казань")
-    public ResponseEntity<Long> getSoldTicketsFromKazanCount() {
-        return ResponseEntity.ok(ticketService.getTicketsFromKazanCount());
+    public ResponseEntity<GetSoldTicketsFromKazanCountResponse> getSoldTicketsFromKazanCount() {
+        GetSoldTicketsFromKazanCountResponse getSoldTicketsFromKazanCountResponse =
+                new GetSoldTicketsFromKazanCountResponse(ticketService.getSoldTicketsFromKazanCount());
+        return ResponseEntity.ok(getSoldTicketsFromKazanCountResponse);
     }
 
     @RequestMapping(value = "/soldstatistic", method = RequestMethod.GET)
     @ApiOperation("Получить статистику по проданным билетам")
     public ResponseEntity<GetStatisticOfSoldTicketsResponse> getStatisticOfSoldTickets() {
         BigDecimal averagecommission = ticketService.getAverageCommissionOfSoldTickets();
-        Long fromKazan = ticketService.getTicketsFromKazanCount();
+        Long fromKazan = ticketService.getSoldTicketsFromKazanCount();
         BigDecimal totalEarned = ticketService.getTotalEarned();
         Long totalSold = ticketService.getTicketsSoldCount();
         GetStatisticOfSoldTicketsResponse getStatisticOfSoldTicketsResponse = new GetStatisticOfSoldTicketsResponse(totalSold, fromKazan, averagecommission, totalEarned);

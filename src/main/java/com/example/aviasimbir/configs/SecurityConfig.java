@@ -14,8 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private static final String[] CASHIER_ENDPOINTS = {"/cashier/**"};
-    private static final String[] REPRESENTATIVE_ENDPOINTS = {"/representative/**"};
+    private static final String[] CASHIER_ENDPOINTS = {"/cashier/**", "/swagger-ui/**"};
+    private static final String[] REPRESENTATIVE_ENDPOINTS = {"/representative/**", "/swagger-ui/**"};
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired

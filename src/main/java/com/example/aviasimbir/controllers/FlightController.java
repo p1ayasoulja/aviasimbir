@@ -7,7 +7,6 @@ import com.example.aviasimbir.exceptions.NoSuchIdException;
 import com.example.aviasimbir.exceptions.WrongArgumentException;
 import com.example.aviasimbir.requestresponse.*;
 import com.example.aviasimbir.service.FlightService;
-import com.example.aviasimbir.service.PlaneService;
 import com.example.aviasimbir.service.TicketService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +20,10 @@ import java.util.stream.Collectors;
 public class FlightController {
     private final FlightService flightService;
     private final TicketService ticketService;
-    private final PlaneService planeService;
 
-    public FlightController(FlightService flightService, TicketService ticketService, PlaneService planeService) {
+    public FlightController(FlightService flightService, TicketService ticketService) {
         this.flightService = flightService;
         this.ticketService = ticketService;
-        this.planeService = planeService;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -42,10 +39,9 @@ public class FlightController {
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation("Создать рейс")
     public ResponseEntity<FlightResponse> createFlight(@RequestBody CreateFlightRequest createFlightRequest) throws WrongArgumentException, NoSuchIdException, FlightTimeException {
-        Flight flight = flightService.createFlight(planeService.getPlane(createFlightRequest.getPlaneId()), createFlightRequest.getDeparture(),
+        Flight flight = flightService.createFlight(createFlightRequest.getPlaneId(), createFlightRequest.getDeparture(),
                 createFlightRequest.getDestination(), createFlightRequest.getDepartureTime(),
-                createFlightRequest.getArrivalTime());
-        ticketService.createTicketsForCreatedFlight(flight.getId(), createFlightRequest.getCommission(), flight.getPlane().getSeats(), createFlightRequest.getTicketPrice());
+                createFlightRequest.getArrivalTime(), createFlightRequest.getCommission(), createFlightRequest.getTicketPrice());
         FlightResponse flightResponse = new FlightResponse(flight.getId(), flight.getPlane().getAirline().getName(), flight.getDeparture(),
                 flight.getDestination(), flight.getDepartureTime(), flight.getArrivalTime());
         return ResponseEntity.ok(flightResponse);
@@ -53,11 +49,9 @@ public class FlightController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.PATCH)
     @ApiOperation("Обновить рейс")
-    public ResponseEntity<FlightResponse> updateFlight(@PathVariable("id") Long id, @RequestBody UpdateFlightRequest updateFlightRequest) throws NoSuchIdException, WrongArgumentException {
+    public ResponseEntity<FlightResponse> updateFlight(@PathVariable("id") Long id, @RequestBody UpdateFlightRequest updateFlightRequest) throws NoSuchIdException, WrongArgumentException, FlightTimeException {
         Flight flight = flightService.updateFlight(id, updateFlightRequest.getDepartureTime(), updateFlightRequest.getArrivalTime(),
-                planeService.getPlane(updateFlightRequest.getPlaneId()),
-                updateFlightRequest.getDeparture(), updateFlightRequest.getDestination());
-
+                updateFlightRequest.getPlaneId(), updateFlightRequest.getDeparture(), updateFlightRequest.getDestination());
         FlightResponse flightResponse = new FlightResponse(flight.getId(), flight.getPlane().getAirline().getName(),
                 flight.getDeparture(), flight.getDestination(), flight.getDepartureTime(),
                 flight.getArrivalTime());
@@ -67,7 +61,7 @@ public class FlightController {
     @RequestMapping(value = "/{id}/addticket", method = RequestMethod.POST)
     @ApiOperation("Добавить билет на рейс")
     public ResponseEntity<TicketResponse> createTicketForFlight(@PathVariable("id") Long id, @RequestBody CreateTicketRequest createTickerRequest) throws NoSuchIdException, WrongArgumentException {
-        Ticket ticket = ticketService.createTicket(flightService.getFlight(id), createTickerRequest.getPrice(),
+        Ticket ticket = ticketService.createTicket(id, createTickerRequest.getPrice(),
                 false, false, createTickerRequest.getCommission());
         TicketResponse ticketResponse = new TicketResponse(ticket.getFlight().getDeparture(), ticket.getFlight().getDestination(),
                 ticket.getPrice(), ticket.getReserved(), ticket.getSold());
@@ -83,7 +77,7 @@ public class FlightController {
     @RequestMapping(value = "/{id}/tickets", method = RequestMethod.GET)
     @ApiOperation("Показать список досутпных билетов")
     public ResponseEntity<List<GetAllAvailableTicketsResponse>> getAllAvailableTickets(@PathVariable("id") Long id) throws NoSuchIdException {
-        List<Ticket> tickets = ticketService.getAllAvailableTicketsByFlight(flightService.getFlight(id));
+        List<Ticket> tickets = ticketService.getAllAvailableTicketsByFlight(id);
         List<GetAllAvailableTicketsResponse> getAllAvailableTicketsResponse = tickets.stream()
                 .map(ticket -> new GetAllAvailableTicketsResponse(ticket.getId(), ticket.getPrice())).collect(Collectors.toList());
         return ResponseEntity.ok(getAllAvailableTicketsResponse);

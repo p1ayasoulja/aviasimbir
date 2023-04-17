@@ -1,6 +1,5 @@
 package com.example.aviasimbir.controllers;
 
-import com.example.aviasimbir.entity.Ticket;
 import com.example.aviasimbir.exceptions.NoSuchIdException;
 import com.example.aviasimbir.exceptions.PlaneAlreadyLeftException;
 import com.example.aviasimbir.exceptions.TicketReservedException;
@@ -56,8 +55,7 @@ public class TicketController {
     @RequestMapping(value = "/{id}/reserve", method = RequestMethod.PATCH)
     @ApiOperation("Забронировать билет")
     public ResponseEntity<Object> reserveTicket(@PathVariable("id") Long id) throws NoSuchIdException, TicketReservedException, PlaneAlreadyLeftException {
-        Ticket ticket = ticketService.getTicket(id);
-        ticketService.reserveTicket(ticket);
+        ticketService.reserveTicket(id);
         return ResponseEntity.ok().build();
     }
 }

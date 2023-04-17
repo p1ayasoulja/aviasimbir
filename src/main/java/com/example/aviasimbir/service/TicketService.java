@@ -15,8 +15,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @Slf4j
@@ -24,42 +22,35 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final FlightRepository flightRepository;
     private final TicketReservationService ticketReservationService;
+    private final UserService userService;
     @Value("${ticket.fixedcommission}")
     private BigDecimal fixedcommission;
     @Value("${ticket.reservation.timeout}")
-    private Long reservationTimeout;
+    private Long reservationTimeoutInMinutes;
 
-    public TicketService(TicketRepository ticketRepository, FlightRepository flightRepository, TicketReservationService ticketReservationService) {
+    public TicketService(TicketRepository ticketRepository, FlightRepository flightRepository, TicketReservationService ticketReservationService, UserService userService) {
         this.ticketRepository = ticketRepository;
         this.flightRepository = flightRepository;
         this.ticketReservationService = ticketReservationService;
-    }
-
-    /**
-     * Получить билет по идентификатору
-     *
-     * @param id идентификатор билета
-     * @return билет
-     */
-    public Ticket getTicket(Long id) throws NoSuchIdException {
-        if (ticketRepository.findById(id).isPresent()) {
-            log.info("IN getTicket - Ticket: {} successfully found", id);
-            return ticketRepository.findById(id).get();
-        } else throw new NoSuchIdException("Ticket with id " + id + " was not found");
+        this.userService = userService;
     }
 
     /**
      * Создать билет
      *
-     * @param flight     рейс билета
+     * @param flightId   идентификатор рейса
      * @param price      цена билета
      * @param reserved   статус брони дилета
      * @param sold       статус доступности билета
      * @param commission статус наличия коммиссии
      * @return билет
+     * @throws NoSuchIdException      ошибка неверного идентификатора
+     * @throws WrongArgumentException ошибка неверно введенных данных
      */
     @Transactional
-    public Ticket createTicket(Flight flight, BigDecimal price, Boolean reserved, Boolean sold, Boolean commission) throws WrongArgumentException {
+    public Ticket createTicket(Long flightId, BigDecimal price, Boolean reserved, Boolean sold, Boolean commission) throws WrongArgumentException, NoSuchIdException {
+        Flight flight = flightRepository.findById(flightId)
+                .orElseThrow(() -> new NoSuchIdException("Flight with id " + flightId + " was not found"));
         if (flight == null || price.compareTo(BigDecimal.ZERO) <= 0 || reserved == null || sold == null || commission == null) {
             throw new WrongArgumentException("All fields must be filled");
         }
@@ -81,7 +72,7 @@ public class TicketService {
      */
     public Long getSoldTicketsFromKazanCount() {
         long number = ticketRepository.getTicketsByFlightDepartureAndSold("Kazan");
-        log.info("IN ticketsFromKazan - Number of sold tickets from Kazan successfully found");
+        log.info("IN getSoldTicketsFromKazanCount - Number of sold tickets from Kazan successfully counted");
         return number;
     }
 
@@ -105,39 +96,17 @@ public class TicketService {
         return averageCommission;
     }
 
-
-    /**
-     * Создать билеты для только что созданного рейса
-     *
-     * @param id         идентификатор рейса
-     * @param commission флаг наличия коммисии
-     * @param seats      число билетов
-     * @param price      цена билетов
-     */
-    public void createTicketsForCreatedFlight(Long id, Boolean commission, Integer seats, BigDecimal price) throws NoSuchIdException, WrongArgumentException {
-        Flight flight = flightRepository.findById(id)
-                .orElseThrow(() -> new NoSuchIdException("Flight with id " + id + " was not found"));
-        if (commission == null || price.compareTo(BigDecimal.ZERO) <= 0 || seats <= 0) {
-            throw new WrongArgumentException("All fields must be filled");
-        }
-        if (commission) {
-            price = price.multiply((BigDecimal.ONE.add
-                    (fixedcommission.divide(BigDecimal.valueOf(100), 3, RoundingMode.HALF_UP))));
-        }
-        BigDecimal finalPrice = price;
-        List<Ticket> tickets = IntStream.range(0, seats / 2)
-                .mapToObj(i -> new Ticket(flight, finalPrice, false, false, commission))
-                .collect(Collectors.toList());
-        ticketRepository.saveAll(tickets);
-    }
-
     /**
      * Продать билет
      *
-     * @param ticket билет
+     * @param id идентификатор билета
+     * @throws NoSuchIdException         ошибка неверного идентификатора
+     * @throws PlaneAlreadyLeftException ошибка действия с билетом на уже улетевший рейс
      */
     @Transactional
-    public void sellTicket(Ticket ticket) throws TicketSoldException, PlaneAlreadyLeftException, NoSuchIdException {
+    public void sellTicket(Long id) throws TicketSoldException, PlaneAlreadyLeftException, NoSuchIdException {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new NoSuchIdException("Ticket with id " + id + " was not found"));
         Flight flight = flightRepository.findById(ticket.getFlight().getId())
                 .orElseThrow(() -> new NoSuchIdException("Flight was not found"));
         if (!flight.getDepartureTime().isAfter(ZonedDateTime.now())) {
@@ -152,13 +121,19 @@ public class TicketService {
             ticketRepository.save(ticket);
         }
     }
+
     /**
      * Забронировать билет
      *
-     * @param ticket билет
+     * @param id идентификатор билет
+     * @throws NoSuchIdException         ошибка неверного идентификатора
+     * @throws PlaneAlreadyLeftException ошибка действия с билетом на уже улетевший рейс
+     * @throws TicketReservedException   ошибка бронирования билета
      */
     @Transactional
-    public void reserveTicket(Ticket ticket) throws TicketReservedException, PlaneAlreadyLeftException, NoSuchIdException {
+    public void reserveTicket(Long id) throws TicketReservedException, PlaneAlreadyLeftException, NoSuchIdException {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new NoSuchIdException("Ticket was not found"));
         Flight flight = flightRepository.findById(ticket.getFlight().getId())
                 .orElseThrow(() -> new NoSuchIdException("Flight was not found"));
         if (!flight.getDepartureTime().isAfter(ZonedDateTime.now())) {
@@ -166,10 +141,10 @@ public class TicketService {
         }
         if (!ticket.getReserved()) {
             ticket.setReserved(true);
-            ticket.setReservedUntil(LocalDateTime.now().plusSeconds(reservationTimeout));
-            log.info("IN reserveTicket - Ticket successfully reserved");
+            ticket.setReservedUntil(LocalDateTime.now().plusMinutes(reservationTimeoutInMinutes));
+            log.info("IN reserveTicket - Ticket successfully reserved until {}", ticket.getReservedUntil());
             ticketRepository.save(ticket);
-            ticketReservationService.scheduleTicketReservation(ticket);
+            ticketReservationService.scheduleTicketReservation(ticket.getId());
         } else {
             throw new TicketReservedException("Ticket already reserved");
         }
@@ -178,10 +153,13 @@ public class TicketService {
     /**
      * Снять бронь с билета
      *
-     * @param ticket билет
+     * @param id идентификатор билета
+     * @throws NoSuchIdException ошибка неверного идентификатора
      */
     @Transactional
-    public void cancelTicketReserve(Ticket ticket) {
+    public void cancelTicketReserve(Long id) throws NoSuchIdException {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new NoSuchIdException("Ticket with id " + id + " was not found"));
         if (ticket.getReserved() && ticket.getReservedUntil().isBefore(LocalDateTime.now())) {
             ticket.setReserved(false);
             ticket.setReservedUntil(null);
@@ -193,9 +171,13 @@ public class TicketService {
     /**
      * Получить список доступных билетов по рейсу
      *
+     * @param flightId идентификатор рейса
      * @return список доступных билетов рейса
+     * @throws NoSuchIdException ошибка неверного идентификатора
      */
-    public List<Ticket> getAllAvailableTicketsByFlight(Flight flight) {
+    public List<Ticket> getAllAvailableTicketsByFlight(Long flightId) throws NoSuchIdException {
+        Flight flight = flightRepository.findById(flightId)
+                .orElseThrow(() -> new NoSuchIdException("Flight with id " + flightId + " was not found"));
         List<Ticket> tickets = ticketRepository.getTicketByFlightAndNotReserved(flight);
         log.info("IN getAllAvailableTicketsByFlight - Tickets successfully found");
         return tickets;
@@ -207,11 +189,7 @@ public class TicketService {
      * @return сумма заработка
      */
     public BigDecimal getTotalEarned() {
-        BigDecimal earned = BigDecimal.ZERO;
-        List<Ticket> tickets = ticketRepository.findBySold();
-        for (Ticket ticket : tickets) {
-            earned = earned.add(ticket.getPrice());
-        }
+        BigDecimal earned = ticketRepository.getTotalEarnedSum();
         log.info("IN getTotalEarned - Sum of sold tickets successfully counted : {}", earned);
         return earned;
     }
@@ -222,19 +200,27 @@ public class TicketService {
      * @return число билетов
      */
     public Long getTicketsSoldCount() {
-        List<Ticket> tickets = ticketRepository.findAll();
-        log.info("IN ticketsFromKazan - Number of sold tickets from Kazan successfully found");
-        return tickets.stream().filter(Ticket::getSold).count();
+        long totalSold = ticketRepository.countBySold();
+        log.info("IN getTicketsSoldCount - Number of sold tickets successfully counted");
+        return totalSold;
     }
 
     /**
-     * Подсчитать число проданных билетов
+     * Получить список билетов(доступных или нет в зависимости от параметра)
      *
+     * @param id       идентификатор авиалинии
+     * @param sold     флаг продан или не продан билет
+     * @param username никнейм пользователя
      * @return число билетов
+     * @throws NotRepresentativeException ошибка доступа
      */
-    public List<Ticket> findTicketsByAirline(Long id, Boolean sold) {
-        List<Ticket> tickets = ticketRepository.getAllTicketsByAirlineAndSold(id, sold);
-        log.info("IN ticketsFromKazan - Number of sold tickets from Kazan successfully found");
-        return tickets;
+    public List<Ticket> findTicketsByAirline(Long id, Boolean sold, String username) throws NotRepresentativeException {
+        if (userService.isRepresentativeOfThisAirline(username, id)) {
+            List<Ticket> tickets = ticketRepository.getAllTicketsByAirlineAndSold(id, sold);
+            log.info("IN findTicketsByAirline - Tickets successfully found");
+            return tickets;
+        } else {
+            throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
+        }
     }
 }

@@ -3,9 +3,11 @@ package com.example.aviasimbir.repo;
 import com.example.aviasimbir.entity.Airline;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 
+@Repository
 public interface AirlineRepository extends JpaRepository<Airline, Long> {
     @Query("SELECT COUNT(t) FROM Ticket t JOIN t.flight f JOIN f.plane p JOIN p.airline a WHERE a.id = ?1 AND t.sold = true")
     Long getTotalSoldTicketsByAirline(Long id);

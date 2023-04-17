@@ -1,6 +1,6 @@
 package com.example.aviasimbir.service;
 
-import com.example.aviasimbir.entity.Ticket;
+import com.example.aviasimbir.exceptions.NoSuchIdException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ public class TicketReservationService {
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
     private final TicketService ticketService;
     @Value("${ticket.reservation.timeout}")
-    private int reservationTimeout;
+    private int reservationTimeoutInMinutes;
 
     @Lazy
     public TicketReservationService(TicketService ticketService) {
@@ -24,11 +24,15 @@ public class TicketReservationService {
     /**
      * Установка таймера бронирования билета
      *
-     * @param ticket билет
+     * @param id идентификатор билета
      */
-    public void scheduleTicketReservation(Ticket ticket) {
+    public void scheduleTicketReservation(Long id) {
         executorService.schedule(() -> {
-            ticketService.cancelTicketReserve(ticket);
-        }, reservationTimeout, TimeUnit.SECONDS);
+            try {
+                ticketService.cancelTicketReserve(id);
+            } catch (NoSuchIdException e) {
+                throw new RuntimeException(e);
+            }
+        }, reservationTimeoutInMinutes, TimeUnit.MINUTES);
     }
 }

@@ -5,7 +5,6 @@ import com.example.aviasimbir.exceptions.NoSuchIdException;
 import com.example.aviasimbir.exceptions.WrongArgumentException;
 import com.example.aviasimbir.requestresponse.CreatePlaneRequest;
 import com.example.aviasimbir.requestresponse.PlaneResponse;
-import com.example.aviasimbir.service.AirlineService;
 import com.example.aviasimbir.service.PlaneService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/plane")
 public class PlaneController {
     private final PlaneService planeService;
-    private final AirlineService airlineService;
 
-    public PlaneController(PlaneService planeService, AirlineService airlineService) {
+    public PlaneController(PlaneService planeService) {
         this.planeService = planeService;
-        this.airlineService = airlineService;
     }
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
@@ -35,7 +32,7 @@ public class PlaneController {
     @ApiOperation("Создать самолет")
     public ResponseEntity<PlaneResponse> createPlane(@RequestBody CreatePlaneRequest createPlaneRequest) throws NoSuchIdException, WrongArgumentException {
         Plane plane = planeService.createPlane(createPlaneRequest.getBrand(), createPlaneRequest.getModel(),
-                createPlaneRequest.getSeats(), airlineService.getAirline(createPlaneRequest.getAirlineId()));
+                createPlaneRequest.getSeats(), createPlaneRequest.getAirlineId());
         PlaneResponse planeResponse = new PlaneResponse(plane.getId(), plane.getBrand(), plane.getModel(), plane.getSeats(), plane.getAirline().getName());
         return ResponseEntity.ok(planeResponse);
     }

@@ -43,4 +43,20 @@ public class Airline {
     public String toString() {
         return "Airline " + name;
     }
+
+    public List<Plane> getPlanes() {
+        return planes;
+    }
+
+    public void setPlanes(List<Plane> planes) {
+        this.planes = planes;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
+    }
 }

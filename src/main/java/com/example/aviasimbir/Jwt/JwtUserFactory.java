@@ -13,7 +13,7 @@ public final class JwtUserFactory {
         return new JwtUser(user.getId(),
                 user.getUsername(),
                 user.getPassword(),
-                authorities,
-                true);
+                authorities
+        );
     }
 }

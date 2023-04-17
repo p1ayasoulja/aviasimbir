@@ -10,19 +10,17 @@ public class JwtUser implements UserDetails {
     private final Long id;
     private final String username;
     private final String password;
-    private final boolean enabled;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public JwtUser(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities, boolean enabled) {
+    public JwtUser(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
-        this.enabled = enabled;
     }
 
     @JsonIgnore
-    public Long getId() {
+    public Long id() {
         return id;
     }
 

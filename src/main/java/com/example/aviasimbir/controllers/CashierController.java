@@ -1,6 +1,5 @@
 package com.example.aviasimbir.controllers;
 
-import com.example.aviasimbir.entity.Ticket;
 import com.example.aviasimbir.exceptions.NoSuchIdException;
 import com.example.aviasimbir.exceptions.PlaneAlreadyLeftException;
 import com.example.aviasimbir.exceptions.TicketSoldException;
@@ -24,16 +23,14 @@ public class CashierController {
     @RequestMapping(value = "/{id}/sell", method = RequestMethod.PUT)
     @ApiOperation("Продать билет")
     public ResponseEntity<Object> sellTicket(@PathVariable("id") Long id) throws NoSuchIdException, TicketSoldException, PlaneAlreadyLeftException {
-        Ticket ticket = ticketService.getTicket(id);
-        ticketService.sellTicket(ticket);
+        ticketService.sellTicket(id);
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping(value = "/{id}/cancelreservation", method = RequestMethod.PUT)
     @ApiOperation("Снять бронь с билета")
-    public ResponseEntity<Object> cancelReservationTicket(@PathVariable("id") Long id) throws NoSuchIdException {
-        Ticket ticket = ticketService.getTicket(id);
-        ticketService.cancelTicketReserve(ticket);
+    public ResponseEntity<Object> cancelTicketReservation(@PathVariable("id") Long id) throws NoSuchIdException {
+        ticketService.cancelTicketReserve(id);
         return ResponseEntity.ok().build();
     }
 }

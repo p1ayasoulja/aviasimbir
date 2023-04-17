@@ -5,7 +5,6 @@ import com.example.aviasimbir.Jwt.JwtUser;
 import com.example.aviasimbir.Jwt.JwtUserFactory;
 import com.example.aviasimbir.entity.Role;
 import com.example.aviasimbir.entity.User;
-import com.example.aviasimbir.exceptions.NotRepresentativeException;
 import com.example.aviasimbir.exceptions.RegisterUserException;
 import com.example.aviasimbir.exceptions.UnavailableUsernameException;
 import com.example.aviasimbir.exceptions.UserWasNotFoundException;
@@ -37,7 +36,7 @@ public class UserService implements UserDetailsService {
     /**
      * Регистрация пользователя
      *
-     * @param username имя пользователя
+     * @param username никнейм пользователя
      * @param password пароль пользователя
      * @return новый пользователь
      */
@@ -61,14 +60,17 @@ public class UserService implements UserDetailsService {
         return registeredUser;
     }
 
-    public Boolean isRepresentativeOfThisAirline(String username, Long id) throws NotRepresentativeException {
+    /**
+     * Проверка является ли пользователь представителем авиалинии
+     *
+     * @param username никнейм пользователя
+     * @param id       идентификатор авиалинии
+     * @return флаг результата
+     */
+    public Boolean isRepresentativeOfThisAirline(String username, Long id) {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        if (Objects.equals(user.getAirline().getId(), id)) {
-            return true;
-        } else {
-            throw new NotRepresentativeException("User is not representative");
-        }
+        return Objects.equals(user.getAirline().getId(), id);
     }
 
     /**
@@ -76,6 +78,7 @@ public class UserService implements UserDetailsService {
      *
      * @param username имя пользователя
      * @return пользователь
+     * @throws UserWasNotFoundException ошибка поиска пользователя
      */
     public Optional<User> findByUsername(String username) throws UserWasNotFoundException {
         Optional<User> userOpt = userRepository.findUserByUsername(username);
@@ -90,6 +93,7 @@ public class UserService implements UserDetailsService {
      *
      * @param username имя пользователя
      * @return JWT-пользователь
+     * @throws UsernameNotFoundException ошибка неверного никнейма
      */
     @SneakyThrows
     @Override

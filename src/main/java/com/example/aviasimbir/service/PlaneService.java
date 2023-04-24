@@ -39,12 +39,11 @@ public class PlaneService {
      * @throws NoSuchIdException ошибка неверного идентификатора
      */
     public Plane getPlane(Long id) throws NoSuchIdException {
-        if (planeRepository.findById(id).isPresent()) {
-            log.info("IN getPlane - Plane: {} successfully found", id);
-            return planeRepository.findById(id).get();
-        } else {
+        if (planeRepository.findById(id).isEmpty()) {
             throw new NoSuchIdException("Plane with id " + id + " was not found");
         }
+        log.info("IN getPlane - Plane: {} successfully found", id);
+        return planeRepository.findById(id).get();
     }
 
     /**
@@ -59,16 +58,20 @@ public class PlaneService {
      * @throws WrongArgumentException ошибка неверно введенных данных
      */
     @Transactional
-    public Plane createPlane(String brand, String model, int seats, Long airlineId) throws WrongArgumentException, NoSuchIdException {
-        Airline airline = airlineRepository.findById(airlineId)
-                .orElseThrow(() -> new NoSuchIdException("Airline with id " + airlineId + " was not found"));
-        if (brand == null || brand.trim().isEmpty() || model == null || model.trim().isEmpty() || seats <= 0 || airline == null) {
-            throw new WrongArgumentException("All fields must be filled");
+    public Plane createPlane(String username, Long id, String brand, String model, int seats, Long airlineId) throws WrongArgumentException, NoSuchIdException, NotRepresentativeException {
+        if (userService.isRepresentativeOfThisAirline(username, id)) {
+            Airline airline = airlineRepository.findById(airlineId)
+                    .orElseThrow(() -> new NoSuchIdException("Airline with id " + airlineId + " was not found"));
+            if (brand == null || brand.trim().isEmpty() || model == null || model.trim().isEmpty() || seats <= 0 || airline == null) {
+                throw new WrongArgumentException("All fields must be filled");
+            }
+            Plane plane = new Plane(brand, model, seats, airline);
+            planeRepository.save(plane);
+            log.info("IN createPlane - Plane: {} successfully created", plane.getId());
+            return plane;
+        } else {
+            throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
         }
-        Plane plane = new Plane(brand, model, seats, airline);
-        planeRepository.save(plane);
-        log.info("IN createPlane - Plane: {} successfully created", plane.getId());
-        return plane;
     }
 
     /**
@@ -78,14 +81,16 @@ public class PlaneService {
      * @throws NoSuchIdException ошибка неверного идентификатора
      */
     @Transactional
-    public void deletePlane(Long id) throws NoSuchIdException {
-        if (planeRepository.findById(id).isPresent()) {
-            planeRepository.deleteById(id);
-            log.info("IN deletePlane - Plane: {} successfully deleted", id);
-            loggerRepository.save(new Logger("Plane " + id + " was deleted", Instant.now()));
-        } else {
-            throw new NoSuchIdException("Plane with id " + id + " was not found");
+    public void deletePlane(String username, Long id, Long planeId) throws NoSuchIdException, NotRepresentativeException {
+        if (!userService.isRepresentativeOfThisAirline(username, id)) {
+            throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
         }
+        if (planeRepository.findById(planeId).isEmpty()) {
+            throw new NoSuchIdException("Plane with id " + planeId + " was not found");
+        }
+        planeRepository.deleteById(planeId);
+        log.info("IN deletePlane - Plane: {} successfully deleted", id);
+        loggerRepository.save(new Logger("Plane " + planeId + " was deleted", Instant.now()));
     }
 
     /**
@@ -96,13 +101,12 @@ public class PlaneService {
      * @return число самолетов авиалинии
      * @throws NotRepresentativeException ошибка доступа
      */
-    public Long getNumberOfPlanesForAirline(Long id, String username) throws NotRepresentativeException {
+    public Long getAirlinePlanesCount(Long id, String username) throws NotRepresentativeException {
         if (userService.isRepresentativeOfThisAirline(username, id)) {
-            log.info("IN getNumberOfPlanesForAirline - Number of planes for airline with id {} successfully counted", id);
-            return planeRepository.countByAirlineId(id);
-        } else {
             throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
         }
+        log.info("IN getNumberOfPlanesForAirline - Number of planes for airline with id {} successfully counted", id);
+        return planeRepository.countByAirlineId(id);
     }
 }
 

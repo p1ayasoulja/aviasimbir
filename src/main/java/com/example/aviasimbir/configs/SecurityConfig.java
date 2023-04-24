@@ -16,6 +16,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String[] CASHIER_ENDPOINTS = {"/cashier/**", "/swagger-ui/**"};
     private static final String[] REPRESENTATIVE_ENDPOINTS = {"/representative/**", "/swagger-ui/**"};
+    private static final String[] MANAGER_ENDPOINTS = {"/manager/**", "/swagger-ui/**", "/representative/**"};
+    private static final String CUSTOMER_ENDPOINT = "/customer/**";
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
@@ -42,9 +44,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/auth", "/registration", "/flight/{id}/tickets").permitAll()
+                .antMatchers("/auth", "/registration", "/customer/flight/{id}/tickets", "/customer/filter").permitAll()
+                .antMatchers(CUSTOMER_ENDPOINT).authenticated()
                 .antMatchers(CASHIER_ENDPOINTS).hasAuthority(Role.CASHIER.name())
                 .antMatchers(REPRESENTATIVE_ENDPOINTS).hasAuthority(Role.REPRESENTATIVE.name())
+                .antMatchers(MANAGER_ENDPOINTS).hasAuthority(Role.MANAGER.name())
                 .anyRequest().authenticated()
                 .and()
                 .apply(new JwtConfigurer(jwtTokenProvider));

@@ -1,23 +1,30 @@
 package com.example.aviasimbir.controllers;
 
+import com.example.aviasimbir.entity.Order;
+import com.example.aviasimbir.exceptions.BadStatusException;
 import com.example.aviasimbir.exceptions.NoSuchIdException;
 import com.example.aviasimbir.exceptions.PlaneAlreadyLeftException;
 import com.example.aviasimbir.exceptions.TicketSoldException;
+import com.example.aviasimbir.requestresponse.ChangeOrderStatusRequest;
+import com.example.aviasimbir.requestresponse.GetOrderResponse;
+import com.example.aviasimbir.service.OrderService;
 import com.example.aviasimbir.service.TicketService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/cashier")
 public class CashierController {
     private final TicketService ticketService;
+    private final OrderService orderService;
 
-    public CashierController(TicketService ticketService) {
+    public CashierController(TicketService ticketService, OrderService orderService) {
         this.ticketService = ticketService;
+        this.orderService = orderService;
     }
 
     @RequestMapping(value = "/{id}/sell", method = RequestMethod.PUT)
@@ -27,10 +34,20 @@ public class CashierController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(value = "/{id}/cancelreservation", method = RequestMethod.PUT)
-    @ApiOperation("Снять бронь с билета")
-    public ResponseEntity<Object> cancelTicketReservation(@PathVariable("id") Long id) throws NoSuchIdException {
-        ticketService.cancelTicketReserve(id);
-        return ResponseEntity.ok().build();
+    @RequestMapping(value = "/order/{id}", method = RequestMethod.PUT)
+    @ApiOperation("Поменять статус заказа")
+    public ResponseEntity<Object> changeOrderStatus(@PathVariable("id") Long id, @RequestBody ChangeOrderStatusRequest changeOrderStatusRequest) throws BadStatusException, NoSuchIdException {
+        orderService.changeOrderStatus(id, changeOrderStatusRequest.getStatus());
+        return ResponseEntity.accepted().build();
+    }
+
+    @RequestMapping(value = "/order", method = RequestMethod.GET)
+    @ApiOperation("Получить список всех заказов")
+    public ResponseEntity<List<GetOrderResponse>> getOrders() {
+        List<Order> orderList = orderService.getAll();
+        List<GetOrderResponse> getOrderResponses = orderList.stream()
+                .map(order -> new GetOrderResponse(order.getId(), order.getStatus().name()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(getOrderResponses);
     }
 }

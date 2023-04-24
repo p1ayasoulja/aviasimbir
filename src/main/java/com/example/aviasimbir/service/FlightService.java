@@ -80,21 +80,18 @@ public class FlightService {
         Plane plane = planeRepository.findById(planeId).orElseThrow(() -> new NoSuchIdException("Cant find flight with id = " + planeId));
         if (plane == null || departure == null || departure.trim().isEmpty() || departureTime == null || arrivalTime == null || destination == null || destination.trim().isEmpty()) {
             throw new WrongArgumentException("All fields must be filled");
-        } else {
-            if (departureTime.isAfter(arrivalTime)) {
-                throw new FlightTimeException("Departure time cannot be after arrival time");
-            } else {
-                if (departureTime.isBefore(ZonedDateTime.now())) {
-                    throw new FlightTimeException("Departure time cannot be before current time");
-                } else {
-                    Flight flight = new Flight(plane, departure, destination, departureTime, arrivalTime);
-                    flightRepository.save(flight);
-                    createTicketsForCreatedFlight(flight.getId(), commission, plane.getSeats(), ticketPrice);
-                    log.info("IN createFlight - Flight: {} successfully created", flight.getId());
-                    return flight;
-                }
-            }
         }
+        if (departureTime.isAfter(arrivalTime)) {
+            throw new FlightTimeException("Departure time cannot be after arrival time");
+        }
+        if (departureTime.isBefore(ZonedDateTime.now())) {
+            throw new FlightTimeException("Departure time cannot be before current time");
+        }
+        Flight flight = new Flight(plane, departure, destination, departureTime, arrivalTime);
+        flightRepository.save(flight);
+        createTicketsForCreatedFlight(flight.getId(), commission, plane.getSeats(), ticketPrice);
+        log.info("IN createFlight - Flight: {} successfully created", flight.getId());
+        return flight;
     }
 
     /**
@@ -107,6 +104,7 @@ public class FlightService {
      * @throws NoSuchIdException      ошибка неверного идентификатора
      * @throws WrongArgumentException ошибка неверно введенных данных
      */
+    @Transactional
     public void createTicketsForCreatedFlight(Long id, Boolean commission, Integer seats, BigDecimal price) throws NoSuchIdException, WrongArgumentException {
         Flight flight = flightRepository.findById(id)
                 .orElseThrow(() -> new NoSuchIdException("Flight with id " + id + " was not found"));
@@ -152,20 +150,20 @@ public class FlightService {
         }
         if (departureTime.isAfter(arrivalTime)) {
             throw new FlightTimeException("Departure time cannot be after arrival time");
-        } else {
-            if (departureTime.isBefore(ZonedDateTime.now())) {
-                throw new FlightTimeException("Departure time cannot be before current time");
-            } else {
-                flight.setPlane(plane);
-                flight.setDepartureTime(departureTime);
-                flight.setArrivalTime(arrivalTime);
-                flight.setDeparture(departure);
-                flight.setDestination(destination);
-                flightRepository.save(flight);
-                log.info("IN updateFlight - Flight: {} successfully updated", id);
-                return flight;
-            }
         }
+        if (departureTime.isBefore(ZonedDateTime.now())) {
+            throw new FlightTimeException("Departure time cannot be before current time");
+        }
+        flight.setPlane(plane);
+        flight.setDepartureTime(departureTime);
+        flight.setArrivalTime(arrivalTime);
+        flight.setDeparture(departure);
+        flight.setDestination(destination);
+        flightRepository.save(flight);
+        log.info("IN updateFlight - Flight: {} successfully updated", id);
+        return flight;
+
+
     }
 
     /**

@@ -10,29 +10,29 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class TicketReservationService {
+public class OrderActiveService {
     private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-    private final TicketService ticketService;
-    @Value("${ticket.reservation.timeout}")
-    private int reservationTimeoutInMinutes;
+    private final OrderService orderService;
+    @Value("${order.active.timeout.minutes}")
+    private int orderActiveTimeoutInMinutes;
 
     @Lazy
-    public TicketReservationService(TicketService ticketService) {
-        this.ticketService = ticketService;
+    public OrderActiveService(OrderService orderService) {
+        this.orderService = orderService;
     }
 
     /**
-     * Установка таймера бронирования билета
+     * Установка таймера валидности заказа
      *
      * @param id идентификатор билета
      */
-    public void scheduleTicketReservation(Long id) {
+    public void scheduleCancelOrderActive(Long id) {
         executorService.schedule(() -> {
             try {
-                ticketService.cancelTicketReserve(id);
+                orderService.cancelOrderActive(id);
             } catch (NoSuchIdException e) {
                 throw new RuntimeException(e);
             }
-        }, reservationTimeoutInMinutes, TimeUnit.MINUTES);
+        }, orderActiveTimeoutInMinutes, TimeUnit.MINUTES);
     }
 }

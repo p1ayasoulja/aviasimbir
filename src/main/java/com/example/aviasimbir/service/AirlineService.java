@@ -76,19 +76,18 @@ public class AirlineService {
      */
     @Transactional
     public Airline updateAirline(Long id, String name, String username) throws NoSuchIdException, WrongArgumentException, NotRepresentativeException {
-        if (userService.isRepresentativeOfThisAirline(username, id)) {
-            Airline airline = airlineRepository.findById(id)
-                    .orElseThrow(() -> new NoSuchIdException("Airline with id " + id + " was not found"));
-            if (name == null || name.trim().isEmpty()) {
-                throw new WrongArgumentException("Airline name cannot be null or empty");
-            }
-            airline.setName(name);
-            airlineRepository.save(airline);
-            log.info("IN update - Airline: {} successfully updated", name);
-            return airline;
-        } else {
+        if (!userService.isRepresentativeOfThisAirline(username, id)) {
             throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
         }
+        Airline airline = airlineRepository.findById(id)
+                .orElseThrow(() -> new NoSuchIdException("Airline with id " + id + " was not found"));
+        if (name == null || name.trim().isEmpty()) {
+            throw new WrongArgumentException("Airline name cannot be null or empty");
+        }
+        airline.setName(name);
+        airlineRepository.save(airline);
+        log.info("IN update - Airline: {} successfully updated", name);
+        return airline;
     }
 
     /**
@@ -101,15 +100,14 @@ public class AirlineService {
      */
     @Transactional
     public void deleteAirline(Long id, String username) throws NoSuchIdException, NotRepresentativeException {
-        if (userService.isRepresentativeOfThisAirline(username, id)) {
-            Airline airline = airlineRepository.findById(id)
-                    .orElseThrow(() -> new NoSuchIdException("Airline with id " + id + " was not found"));
-            airlineRepository.delete(airline);
-            log.info("IN delete - Airline: {} successfully deleted", id);
-            loggerRepository.save(new Logger("Airline " + id + " was deleted", Instant.now()));
-        } else {
+        if (!userService.isRepresentativeOfThisAirline(username, id)) {
             throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
         }
+        Airline airline = airlineRepository.findById(id)
+                .orElseThrow(() -> new NoSuchIdException("Airline with id " + id + " was not found"));
+        airlineRepository.delete(airline);
+        log.info("IN delete - Airline: {} successfully deleted", id);
+        loggerRepository.save(new Logger("Airline " + id + " was deleted", Instant.now()));
     }
 
     /**
@@ -121,12 +119,11 @@ public class AirlineService {
      * @throws NotRepresentativeException ошибка доступа
      */
     public Long getTotalSoldTickets(Long id, String username) throws NotRepresentativeException {
-        if (userService.isRepresentativeOfThisAirline(username, id)) {
-            log.info("IN getTotalSoldTickets - Total sold tickets counted");
-            return airlineRepository.getTotalSoldTicketsByAirline(id);
-        } else {
+        if (!userService.isRepresentativeOfThisAirline(username, id)) {
             throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
         }
+        log.info("IN getTotalSoldTickets - Total sold tickets counted");
+        return airlineRepository.getTotalSoldTicketsByAirline(id);
     }
 
     /**
@@ -138,11 +135,10 @@ public class AirlineService {
      * @throws NotRepresentativeException ошибка доступа
      */
     public BigDecimal getTotalEarnedByAirline(Long id, String username) throws NotRepresentativeException {
-        if (userService.isRepresentativeOfThisAirline(username, id)) {
-            log.info("IN getTotalEarnedByAirline - Total earned sum counted");
-            return airlineRepository.getTotalEarnedByAirline(id);
-        } else {
+        if (!userService.isRepresentativeOfThisAirline(username, id)) {
             throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
         }
+        log.info("IN getTotalEarnedByAirline - Total earned sum counted");
+        return airlineRepository.getTotalEarnedByAirline(id);
     }
 }

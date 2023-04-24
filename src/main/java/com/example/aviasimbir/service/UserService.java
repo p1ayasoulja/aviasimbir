@@ -70,7 +70,9 @@ public class UserService implements UserDetailsService {
     public Boolean isRepresentativeOfThisAirline(String username, Long id) {
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return Objects.equals(user.getAirline().getId(), id);
+        String role = user.getRole().name();
+        System.out.println(role + " user role");
+        return user.getRole() == Role.MANAGER || Objects.equals(user.getAirline().getId(), id);
     }
 
     /**
@@ -103,7 +105,7 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("Cant find user with username :" + username);
         }
         JwtUser jwtUser = JwtUserFactory.create(userOpt.get());
-        log.info("IN loadByUsername - user with: {} loaded with Role {}", username, userOpt.get().getRole());
+        log.info("IN loadByUsername - user {} loaded with role {}", username, userOpt.get().getRole());
         return jwtUser;
     }
 }

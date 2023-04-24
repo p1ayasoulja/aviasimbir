@@ -79,4 +79,25 @@ public class ExceptionHandlerController {
         ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
         return new ResponseEntity<>(exceptionResponse, HttpStatus.FORBIDDEN);
     }
+
+    @ApiOperation("Обработка ошибки ввода неверного промокода")
+    @ExceptionHandler(WrongPromocodeException.class)
+    public ResponseEntity<ExceptionResponse> handleWrongPromocodeException(WrongPromocodeException e) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ApiOperation("Обработка ошибки создания заказа")
+    @ExceptionHandler(CreateOrderException.class)
+    public ResponseEntity<ExceptionResponse> handleCreateOrderException(CreateOrderException e) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ApiOperation("Обработка ошибки ввода неверного статуса")
+    @ExceptionHandler(BadStatusException.class)
+    public ResponseEntity<ExceptionResponse> handleBadStatusException(BadStatusException e) {
+        ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
+    }
 }

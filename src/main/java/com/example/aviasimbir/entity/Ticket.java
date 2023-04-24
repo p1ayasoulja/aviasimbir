@@ -2,7 +2,6 @@ package com.example.aviasimbir.entity;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 public class Ticket {
@@ -17,12 +16,13 @@ public class Ticket {
     private BigDecimal price;
     @Column(name = "reserved")
     private Boolean reserved;
-    @Column(name = "reserved_until")
-    private LocalDateTime reservedUntil;
     @Column(name = "sold")
     private Boolean sold;
     @Column(name = "commission")
     private Boolean commission;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "order_id")
+    private Order order;
 
     public Ticket() {
     }
@@ -83,12 +83,12 @@ public class Ticket {
         this.commission = commission;
     }
 
-    public LocalDateTime getReservedUntil() {
-        return reservedUntil;
+    public Order getOrder() {
+        return order;
     }
 
-    public void setReservedUntil(LocalDateTime reservedUntil) {
-        this.reservedUntil = reservedUntil;
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     @Override

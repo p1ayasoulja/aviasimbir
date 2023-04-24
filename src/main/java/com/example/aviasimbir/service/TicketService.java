@@ -5,6 +5,7 @@ import com.example.aviasimbir.entity.Ticket;
 import com.example.aviasimbir.exceptions.*;
 import com.example.aviasimbir.repo.FlightRepository;
 import com.example.aviasimbir.repo.TicketRepository;
+import com.example.aviasimbir.requestresponse.CommissionInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -21,17 +23,14 @@ import java.util.List;
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final FlightRepository flightRepository;
-    private final TicketReservationService ticketReservationService;
     private final UserService userService;
     @Value("${ticket.fixedcommission}")
     private BigDecimal fixedcommission;
-    @Value("${ticket.reservation.timeout}")
-    private Long reservationTimeoutInMinutes;
 
-    public TicketService(TicketRepository ticketRepository, FlightRepository flightRepository, TicketReservationService ticketReservationService, UserService userService) {
+    public TicketService(TicketRepository ticketRepository, FlightRepository flightRepository,
+                         UserService userService) {
         this.ticketRepository = ticketRepository;
         this.flightRepository = flightRepository;
-        this.ticketReservationService = ticketReservationService;
         this.userService = userService;
     }
 
@@ -66,34 +65,38 @@ public class TicketService {
     }
 
     /**
-     * Подсчитать число билетов с отправлением из Казани
+     * Подсчитать число билетов с заданной точкой отправления
      *
      * @return число билетов
      */
-    public Long getSoldTicketsFromKazanCount() {
-        long number = ticketRepository.getTicketsByFlightDepartureAndSold("Kazan");
-        log.info("IN getSoldTicketsFromKazanCount - Number of sold tickets from Kazan successfully counted");
+    public Long getSoldTicketsFromCount(String departure) {
+        long number = ticketRepository.getTicketsByFlightDepartureAndSold(departure);
+        log.info("IN getSoldTicketsFromCount - Number of sold tickets from {} successfully counted", departure);
         return number;
     }
 
     /**
-     * Подсчитать среднюю коммиссию по проданным билетам
+     * Получить информацию о коммиссии по проданным билетам
      *
-     * @return средняя коммиссия по проданным билетам
+     * @return информация о коммиссии по проданным билетам
      */
-    public BigDecimal getAverageCommissionOfSoldTickets() {
+    public CommissionInfo getCommissionInfo() {
         BigDecimal averageTicketPrice = ticketRepository.getAverageTicketPrice();
         BigDecimal averageCommission;
-        if (averageTicketPrice.equals(BigDecimal.ZERO)) {
+        BigDecimal totalCommission;
+        if (averageTicketPrice == null) {
             averageCommission = BigDecimal.ZERO;
+            totalCommission = BigDecimal.ZERO;
         } else {
             BigDecimal commissionPercentage = fixedcommission.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
             BigDecimal divisor = BigDecimal.ONE.add(commissionPercentage);
             BigDecimal dividend = averageTicketPrice.divide(divisor, 3, RoundingMode.HALF_UP);
             averageCommission = averageTicketPrice.subtract(dividend).setScale(2, RoundingMode.HALF_UP);
+            totalCommission = averageCommission.multiply(BigDecimal.valueOf(ticketRepository.countBySoldAndCommission()));
         }
-        log.info("IN getAverageCommissionOfSoldTickets - Average Commission : {} successfully counted", averageCommission);
-        return averageCommission;
+        log.info("IN getCommissionInfo - Average Commission : {} and Total Commission : {} successfully counted",
+                averageCommission, totalCommission);
+        return new CommissionInfo(averageCommission, totalCommission);
     }
 
     /**
@@ -119,52 +122,6 @@ public class TicketService {
             ticket.setReserved(true);
             log.info("IN sellTicket - Ticket successfully sold");
             ticketRepository.save(ticket);
-        }
-    }
-
-    /**
-     * Забронировать билет
-     *
-     * @param id идентификатор билет
-     * @throws NoSuchIdException         ошибка неверного идентификатора
-     * @throws PlaneAlreadyLeftException ошибка действия с билетом на уже улетевший рейс
-     * @throws TicketReservedException   ошибка бронирования билета
-     */
-    @Transactional
-    public void reserveTicket(Long id) throws TicketReservedException, PlaneAlreadyLeftException, NoSuchIdException {
-        Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new NoSuchIdException("Ticket was not found"));
-        Flight flight = flightRepository.findById(ticket.getFlight().getId())
-                .orElseThrow(() -> new NoSuchIdException("Flight was not found"));
-        if (!flight.getDepartureTime().isAfter(ZonedDateTime.now())) {
-            throw new PlaneAlreadyLeftException("Plane has already left airport");
-        }
-        if (!ticket.getReserved()) {
-            ticket.setReserved(true);
-            ticket.setReservedUntil(LocalDateTime.now().plusMinutes(reservationTimeoutInMinutes));
-            log.info("IN reserveTicket - Ticket successfully reserved until {}", ticket.getReservedUntil());
-            ticketRepository.save(ticket);
-            ticketReservationService.scheduleTicketReservation(ticket.getId());
-        } else {
-            throw new TicketReservedException("Ticket already reserved");
-        }
-    }
-
-    /**
-     * Снять бронь с билета
-     *
-     * @param id идентификатор билета
-     * @throws NoSuchIdException ошибка неверного идентификатора
-     */
-    @Transactional
-    public void cancelTicketReserve(Long id) throws NoSuchIdException {
-        Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new NoSuchIdException("Ticket with id " + id + " was not found"));
-        if (ticket.getReserved() && ticket.getReservedUntil().isBefore(LocalDateTime.now())) {
-            ticket.setReserved(false);
-            ticket.setReservedUntil(null);
-            ticketRepository.save(ticket);
-            log.info("IN cancelTicketReserve - Ticket reservation cancelled");
         }
     }
 
@@ -214,13 +171,34 @@ public class TicketService {
      * @return число билетов
      * @throws NotRepresentativeException ошибка доступа
      */
-    public List<Ticket> findTicketsByAirline(Long id, Boolean sold, String username) throws NotRepresentativeException {
-        if (userService.isRepresentativeOfThisAirline(username, id)) {
-            List<Ticket> tickets = ticketRepository.getAllTicketsByAirlineAndSold(id, sold);
-            log.info("IN findTicketsByAirline - Tickets successfully found");
-            return tickets;
-        } else {
+    public List<Ticket> getTicketsByAirline(Long id, Boolean sold, String username) throws NotRepresentativeException {
+
+        if (!userService.isRepresentativeOfThisAirline(username, id)) {
             throw new NotRepresentativeException("User " + username + " is not a representative of airline with id " + id);
         }
+        List<Ticket> tickets = ticketRepository.getAllTicketsByAirlineAndSold(id, sold);
+        log.info("IN findTicketsByAirline - Tickets successfully found");
+        return tickets;
+    }
+
+    /**
+     * @param departure       место вылета
+     * @param destination     место назначения
+     * @param MinDepartureDay раняя допустимая дата вылета
+     * @param MaxDepartureDay поздняя допустимая дата вылета
+     * @return список билетов, подходящих под условия
+     * @throws WrongArgumentException ошибка неправильных или невведенных данных
+     */
+    public List<Ticket> getTicketsFilter(String departure, String destination, LocalDate MinDepartureDay, LocalDate MaxDepartureDay) throws WrongArgumentException {
+        if (departure == null || departure.trim().isEmpty() || destination == null || destination.trim().isEmpty() ||
+                MinDepartureDay == null || MaxDepartureDay == null || MinDepartureDay.isAfter(MaxDepartureDay) ||
+                MinDepartureDay.isAfter(MaxDepartureDay)) {
+            throw new WrongArgumentException("Some of fields are wrong or not present");
+        }
+        ZoneId zoneId = ZoneId.of("Europe/Moscow");
+        ZonedDateTime MinZonedDateTime = MinDepartureDay.atStartOfDay(zoneId);
+        ZonedDateTime MaxZonedDateTime = MaxDepartureDay.atStartOfDay(zoneId);
+        return ticketRepository.getTicketsByFlightDestinationAndFlightDepartureAndFlightDepartureTime(departure, destination,
+                MinZonedDateTime, MaxZonedDateTime);
     }
 }

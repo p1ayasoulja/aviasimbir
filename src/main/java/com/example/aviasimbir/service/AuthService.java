@@ -21,7 +21,6 @@ public class AuthService {
     }
 
     /**
-     * ?
      * Аутентификация пользователя
      *
      * @param loginUserRequest данные пользователя

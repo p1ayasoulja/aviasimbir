@@ -1,6 +1,7 @@
 package com.example.aviasimbir.controllers;
 
 import com.example.aviasimbir.exceptions.UserWasNotFoundException;
+import com.example.aviasimbir.exceptions.WrongArgumentException;
 import com.example.aviasimbir.requestresponse.LoginUserRequest;
 import com.example.aviasimbir.requestresponse.LoginUserResponse;
 import com.example.aviasimbir.service.AuthService;
@@ -23,7 +24,7 @@ public class AuthenticationController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ApiOperation("Аутентификация пользователя")
-    public ResponseEntity<LoginUserResponse> auth(@RequestBody LoginUserRequest loginUserRequest) throws UserWasNotFoundException {
+    public ResponseEntity<LoginUserResponse> auth(@RequestBody LoginUserRequest loginUserRequest) throws UserWasNotFoundException, WrongArgumentException {
         String token = authService.loginUser(loginUserRequest);
         LoginUserResponse loginUserResponse = new LoginUserResponse(token);
         return ResponseEntity.ok(loginUserResponse);

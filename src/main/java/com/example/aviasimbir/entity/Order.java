@@ -28,6 +28,18 @@ public class Order {
     public Order() {
     }
 
+    public Order(Long id, Status status) {
+        this.id = id;
+        this.status = status;
+    }
+
+    public Order(Long id, BigDecimal totalPrice, ZonedDateTime active_until, Status status) {
+        this.id = id;
+        this.totalPrice = totalPrice;
+        this.active_until = active_until;
+        this.status = status;
+    }
+
     public Order(BigDecimal totalPrice, ZonedDateTime active_until, Status status) {
         this.totalPrice = totalPrice;
         this.active_until = active_until;

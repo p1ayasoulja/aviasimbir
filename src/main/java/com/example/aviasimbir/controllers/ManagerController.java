@@ -98,10 +98,10 @@ public class ManagerController {
 
     @RequestMapping(value = "/tickets/{departure}", method = RequestMethod.GET)
     @ApiOperation("Получить число проданных билетов с указанной точкой отправления")
-    public ResponseEntity<GetSoldTicketsFromKazanCountResponse> getSoldTicketsFromCount(@PathVariable("departure") String departure) {
-        GetSoldTicketsFromKazanCountResponse getSoldTicketsFromKazanCountResponse =
-                new GetSoldTicketsFromKazanCountResponse(ticketService.getSoldTicketsFromCount(departure));
-        return ResponseEntity.ok(getSoldTicketsFromKazanCountResponse);
+    public ResponseEntity<GetSoldTicketsFromCountResponse> getSoldTicketsFromCount(@PathVariable("departure") String departure) {
+        GetSoldTicketsFromCountResponse getSoldTicketsFromCountResponse =
+                new GetSoldTicketsFromCountResponse(ticketService.getSoldTicketsFromCount(departure));
+        return ResponseEntity.ok(getSoldTicketsFromCountResponse);
     }
 
     @RequestMapping(value = "/tickets/soldstatistic", method = RequestMethod.GET)

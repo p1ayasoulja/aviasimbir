@@ -63,7 +63,7 @@ public class ExceptionHandlerController {
     @ExceptionHandler(UserWasNotFoundException.class)
     public ResponseEntity<ExceptionResponse> handleUserWasNotFoundException(UserWasNotFoundException e) {
         ExceptionResponse exceptionResponse = new ExceptionResponse(e.getMessage());
-        return new ResponseEntity<>(exceptionResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(exceptionResponse, HttpStatus.BAD_REQUEST);
     }
 
     @ApiOperation("Обработка ошибки регистрации с уже использованным никнеймом")

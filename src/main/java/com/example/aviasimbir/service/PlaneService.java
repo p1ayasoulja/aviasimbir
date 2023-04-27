@@ -62,7 +62,7 @@ public class PlaneService {
         if (userService.isRepresentativeOfThisAirline(username, id)) {
             Airline airline = airlineRepository.findById(airlineId)
                     .orElseThrow(() -> new NoSuchIdException("Airline with id " + airlineId + " was not found"));
-            if (brand == null || brand.trim().isEmpty() || model == null || model.trim().isEmpty() || seats <= 0 || airline == null) {
+            if (brand == null || brand.trim().isEmpty() || model == null || model.trim().isEmpty() || seats <= 0) {
                 throw new WrongArgumentException("All fields must be filled");
             }
             Plane plane = new Plane(brand, model, seats, airline);

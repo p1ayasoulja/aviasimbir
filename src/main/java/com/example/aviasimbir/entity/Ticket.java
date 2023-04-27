@@ -27,6 +27,12 @@ public class Ticket {
     public Ticket() {
     }
 
+    public Ticket(Long id, BigDecimal price, Boolean sold) {
+        this.id = id;
+        this.price = price;
+        this.sold = sold;
+    }
+
     public Ticket(Flight flight, BigDecimal price, Boolean reserved, Boolean sold, Boolean commission) {
         this.flight = flight;
         this.price = price;

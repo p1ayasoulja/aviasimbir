@@ -76,7 +76,7 @@ public class CustomerController {
 
     @RequestMapping(value = "/order", method = RequestMethod.POST)
     @ApiOperation("Создать заказ")
-    public ResponseEntity<Object> createOrder(@RequestBody CreateOrderRequest createOrderRequest) throws TicketReservedException, WrongPromocodeException, CreateOrderException, PlaneAlreadyLeftException {
+    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest createOrderRequest) throws TicketReservedException, WrongPromocodeException, CreateOrderException, PlaneAlreadyLeftException {
         Order order = orderService.createOrder(createOrderRequest.getTickets_id(), createOrderRequest.getPromocode());
         CreateOrderResponse createOrderResponse = new CreateOrderResponse(order.getId(), order.getTotalPrice(), order.getStatus().name());
         return ResponseEntity.ok(createOrderResponse);

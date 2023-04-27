@@ -75,7 +75,7 @@ public class RepresentativeController {
     @RequestMapping(value = "/tickets", method = RequestMethod.GET)
     @ApiOperation("Получить список всех билетов или список непроданных билетов в зависимости от запроса")
     public ResponseEntity<List<GetAllTicketsResponse>> getTickets(@PathVariable("id") Long id, @AuthenticationPrincipal JwtUser jwtUser,
-                                                                  @RequestBody GetAllTicketsRequest getAllTicketsRequest) throws NotRepresentativeException {
+                                                                  @RequestBody GetAllTicketsRequest getAllTicketsRequest) throws NotRepresentativeException, NoSuchIdException {
         String username = jwtUser.getUsername();
         List<Ticket> tickets = ticketService.getTicketsByAirline(id, getAllTicketsRequest.getSold(), username);
         List<GetAllTicketsResponse> getTicketResponses = tickets.stream()
